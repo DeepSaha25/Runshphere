@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;700;800;900&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"on-surface-variant": "#aaabac", "inverse-surface": "#f9f9fa", "on-secondary-fixed": "#064200", "error-container": "#9f0519", "inverse-on-surface": "#545556", "on-tertiary": "#431300", surface: "#0c0e0f", "surface-tint": "#99f7ff", "secondary-fixed-dim": "#2be800", "on-error-container": "#ffa8a3", "surface-container-high": "#1d2021", "secondary-fixed": "#2ff801", secondary: "#2ff801", "outline-variant": "#464849", "on-secondary-container": "#e7ffd9", "surface-container-highest": "#232628", "secondary-dim": "#2be800", "on-tertiary-fixed-variant": "#682200", primary: "#99f7ff", "primary-fixed": "#00f1fe", "on-background": "#f6f6f7", "on-secondary": "#0b5800", "error-dim": "#d7383b", "surface-container-lowest": "#000000", "on-secondary-fixed-variant": "#0d6200", "surface-dim": "#0c0e0f", tertiary: "#ff793e", "on-tertiary-fixed": "#310c00", "on-primary-fixed": "#004145", "surface-variant": "#232628", "on-primary-container": "#00555a", "primary-fixed-dim": "#00e2ee", background: "#0c0e0f", "tertiary-fixed": "#ff9569", "primary-container": "#00f1fe", "on-error": "#490006", "tertiary-fixed-dim": "#ff7e46", outline: "#747577", "tertiary-container": "#fe5f00", "primary-dim": "#00e2ee", error: "#ff716c", "on-primary": "#005f64", "surface-container-low": "#111415", "on-surface": "#f6f6f7", "secondary-container": "#106e00", "inverse-primary": "#006a70", "on-primary-fixed-variant": "#006065", "surface-bright": "#292d2e", "tertiary-dim": "#ff7436", "surface-container": "#171a1b", "on-tertiary-container": "#290900"}, borderRadius: {DEFAULT: "1rem", lg: "2rem", xl: "3rem", full: "9999px"}, fontFamily: {headline: ["Lexend"], body: ["Inter"], label: ["Inter"], display: "Lexend"}}}};</script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .kinetic-gradient {
+            background: linear-gradient(135deg, #99f7ff 0%, #00f1fe 100%);
+        }
+        .glow-soft {
+            box-shadow: 0 0 32px rgba(153, 247, 255, 0.12);
+        }
+        .hud-ring {
+            stroke-dasharray: 283;
+            stroke-dashoffset: 70;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+        .text-glow {
+            text-shadow: 0 0 8px rgba(153, 247, 255, 0.8);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body selection:bg-primary selection:text-on-primary-container">
+<main class="min-h-screen relative overflow-hidden flex flex-col items-center justify-center p-6 md:p-12">
+<!-- Background Texture -->
+<div class="absolute inset-0 z-0 opacity-20 pointer-events-none">
+<div class="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-primary blur-[120px] opacity-10"></div>
+<div class="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-secondary blur-[150px] opacity-5"></div>
+</div>
+<div class="relative z-10 w-full max-w-xl">
+<!-- Branding/Top Section -->
+<div class="flex flex-col mb-12">
+<div class="flex items-center gap-2 mb-8">
+<span class="font-headline font-black italic text-2xl text-primary tracking-tighter uppercase">RUNSPHERE</span>
+<div class="h-[2px] flex-grow bg-surface-container-highest"></div>
+</div>
+<h1 class="font-headline text-6xl md:text-8xl font-black italic tracking-[-0.04em] leading-[0.85] text-on-background uppercase mb-6">
+                    JOIN THE <span class="text-primary text-glow">PULSE</span>
+</h1>
+<p class="font-label text-sm font-bold tracking-[0.2em] text-on-surface-variant uppercase">
+                    PHASE 01: NEURAL IDENTITY LINK
+                </p>
+</div>
+<!-- Kinetic Progress Ring HUD -->
+<div class="flex items-center gap-6 mb-12 px-2">
+<div class="relative w-16 h-16">
+<svg class="w-full h-full" viewbox="0 0 100 100">
+<circle class="text-surface-container-highest stroke-current" cx="50" cy="50" fill="transparent" r="45" stroke-width="8"></circle>
+<circle class="text-secondary stroke-current hud-ring" cx="50" cy="50" fill="transparent" r="45" stroke-linecap="round" stroke-width="8"></circle>
+</svg>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="font-headline text-lg font-bold italic">01</span>
+</div>
+</div>
+<div class="flex flex-col">
+<span class="font-label text-[10px] uppercase tracking-widest text-secondary">Step Progress</span>
+<span class="font-headline text-xl font-bold tracking-tight">PROTOCOL INITIALIZATION</span>
+</div>
+</div>
+<!-- Form Section -->
+<form class="space-y-8 w-full">
+<!-- Full Name -->
+<div class="relative group">
+<label class="block font-label text-[10px] font-bold uppercase tracking-[0.15em] text-on-surface-variant mb-2 ml-1">
+                        Full Name / Operator ID
+                    </label>
+<div class="relative">
+<input class="w-full bg-surface-container-lowest border-none py-5 px-6 rounded-lg font-headline font-bold text-lg tracking-tight text-on-surface placeholder:text-surface-container-highest focus:ring-0 transition-all" placeholder="E.G. ALEX STRIKE" type="text"/>
+<div class="absolute bottom-0 left-0 h-[2px] w-0 bg-primary transition-all duration-500 group-focus-within:w-full glow-soft"></div>
+</div>
+</div>
+<!-- Email -->
+<div class="relative group">
+<label class="block font-label text-[10px] font-bold uppercase tracking-[0.15em] text-on-surface-variant mb-2 ml-1">
+                        Communications Channel (Email)
+                    </label>
+<div class="relative">
+<input class="w-full bg-surface-container-lowest border-none py-5 px-6 rounded-lg font-headline font-bold text-lg tracking-tight text-on-surface placeholder:text-surface-container-highest focus:ring-0 transition-all" placeholder="LINK@RUNSPHERE.CORE" type="email"/>
+<div class="absolute bottom-0 left-0 h-[2px] w-0 bg-primary transition-all duration-500 group-focus-within:w-full glow-soft"></div>
+</div>
+</div>
+<!-- Secure Protocol -->
+<div class="relative group">
+<div class="flex justify-between items-end mb-2 ml-1">
+<label class="font-label text-[10px] font-bold uppercase tracking-[0.15em] text-on-surface-variant">
+                            Secure Protocol (Password)
+                        </label>
+<span class="font-label text-[9px] uppercase text-secondary font-black tracking-widest">Encyption Active</span>
+</div>
+<div class="relative">
+<input class="w-full bg-surface-container-lowest border-none py-5 px-6 rounded-lg font-headline font-bold text-lg tracking-tight text-on-surface placeholder:text-surface-container-highest focus:ring-0 transition-all" placeholder="••••••••••••" type="password"/>
+<div class="absolute bottom-0 left-0 h-[2px] w-0 bg-primary transition-all duration-500 group-focus-within:w-full glow-soft"></div>
+<div class="absolute right-6 top-1/2 -translate-y-1/2 text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="visibility_lock">visibility_lock</span>
+</div>
+</div>
+</div>
+<!-- CTA Button -->
+<div class="pt-6">
+<button class="kinetic-gradient w-full py-6 rounded-xl font-headline font-black italic text-xl uppercase tracking-tighter text-on-primary-container flex items-center justify-center gap-3 transition-transform active:scale-[0.96] shadow-[0_16px_48px_rgba(153,247,255,0.15)] group" type="submit">
+                        INITIALIZE TRAINING
+                        <span class="material-symbols-outlined transition-transform group-hover:translate-x-2" data-icon="bolt">bolt</span>
+</button>
+</div>
+</form>
+<!-- Legal/Terms -->
+<div class="mt-12 text-center">
+<p class="font-body text-xs text-on-surface-variant leading-relaxed px-12">
+                    By initializing your profile, you agree to the <a class="text-on-surface underline decoration-primary/30 underline-offset-4 hover:decoration-primary transition-all" href="#">Terms of Performance</a> and <a class="text-on-surface underline decoration-primary/30 underline-offset-4 hover:decoration-primary transition-all" href="#">Bio-Data Privacy Protocols</a>.
+                </p>
+<div class="mt-8 flex justify-center items-center gap-4 text-surface-container-highest">
+<span class="h-[1px] w-12 bg-current"></span>
+<span class="font-label text-[10px] tracking-[0.3em] font-black uppercase">End Of Transmission</span>
+<span class="h-[1px] w-12 bg-current"></span>
+</div>
+</div>
+</div>
+<!-- Decorative UI Element (Corner HUD) -->
+<div class="hidden lg:block absolute top-12 right-12 w-48 h-48 pointer-events-none opacity-40">
+<div class="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-primary"></div>
+<div class="p-4 space-y-2">
+<div class="h-1 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full w-2/3 bg-secondary"></div>
+</div>
+<div class="h-1 w-3/4 bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full w-1/2 bg-primary"></div>
+</div>
+<div class="font-label text-[8px] text-on-surface-variant flex justify-between">
+<span>SYS_LOAD</span>
+<span>88%</span>
+</div>
+</div>
+</div>
+<!-- Decorative UI Element (Bottom Left HUD) -->
+<div class="hidden lg:block absolute bottom-12 left-12 font-label text-[10px] tracking-widest text-on-surface-variant space-y-1 opacity-40">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+<span>SYSTEM_STATUS: NOMINAL</span>
+</div>
+<div class="pl-4">LATENCY: 14MS</div>
+<div class="pl-4">ENCRYPTION: AES-256_KINETIC</div>
+</div>
+</main>
+<!-- Background Images (Hidden but defined for aesthetic context) -->
+<img class="hidden" data-alt="dramatic low angle shot of a runner starting a race on a neon lit futuristic track at night dark high contrast" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2x17WCTdyBs-gDIzPh44uqJX2jCY7w6sk8KX49dCvO9SPBA0tnzNCmtFwBScd_p9E7ORP09s-rihof1y26RKMgMFuPZP2XwTuRz_6tyVKvgz1k-nxooHeMeNReCtJ_Vj9rie3qCU1uEAxNQ4EZWfz1JncFITM2dAN3pDEsbA5hyiNjHuieW1TifLxWQLalUhr87QN806OL12CYXV78IIjyya1zgnL3cyNDgNiA25QcPOpsISxI8Ulezcw2bjDSPJwbf7PcWoMfkBx"/>
+<img class="hidden" data-alt="abstract digital light trails in cyan and lime green zooming forward into deep black void high speed motion" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAq0s9ASsS5YYC8KtR8OyzaHpKLue2owMy-blGaYi56e2IH2DYM2PtzsNn18Vd-g1TCOSIm0owx4aCQCbuSJ6c3Npk9Bmn_j0En2Ap4nnk86iiyoBpJL_LM_FlNiGUTtKAjhEO9koliGe6KYlLG8ZUCr0q6gePuWjbV7WxAICr3GKq_MB3At81LuqiAAE2PmhHTorPM8BvTBM8AMh8548zaWCYI5V0GApJVQSdGXPiB61xtx3HLfxBwUjAQm0GBrF_gvz7YZoUpU4S-"/>
+</body></html>

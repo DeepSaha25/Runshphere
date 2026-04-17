@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RunSphere - Performance Tracking</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;700;800;900&amp;family=Inter:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"on-surface-variant": "#aaabac", "inverse-surface": "#f9f9fa", "on-secondary-fixed": "#064200", "error-container": "#9f0519", "inverse-on-surface": "#545556", "on-tertiary": "#431300", surface: "#0c0e0f", "surface-tint": "#99f7ff", "secondary-fixed-dim": "#2be800", "on-error-container": "#ffa8a3", "surface-container-high": "#1d2021", "secondary-fixed": "#2ff801", secondary: "#2ff801", "outline-variant": "#464849", "on-secondary-container": "#e7ffd9", "surface-container-highest": "#232628", "secondary-dim": "#2be800", "on-tertiary-fixed-variant": "#682200", primary: "#99f7ff", "primary-fixed": "#00f1fe", "on-background": "#f6f6f7", "on-secondary": "#0b5800", "error-dim": "#d7383b", "surface-container-lowest": "#000000", "on-secondary-fixed-variant": "#0d6200", "surface-dim": "#0c0e0f", tertiary: "#ff793e", "on-tertiary-fixed": "#310c00", "on-primary-fixed": "#004145", "surface-variant": "#232628", "on-primary-container": "#00555a", "primary-fixed-dim": "#00e2ee", background: "#0c0e0f", "tertiary-fixed": "#ff9569", "primary-container": "#00f1fe", "on-error": "#490006", "tertiary-fixed-dim": "#ff7e46", outline: "#747577", "tertiary-container": "#fe5f00", "primary-dim": "#00e2ee", error: "#ff716c", "on-primary": "#005f64", "surface-container-low": "#111415", "on-surface": "#f6f6f7", "secondary-container": "#106e00", "inverse-primary": "#006a70", "on-primary-fixed-variant": "#006065", "surface-bright": "#292d2e", "tertiary-dim": "#ff7436", "surface-container": "#171a1b", "on-tertiary-container": "#290900"}, borderRadius: {DEFAULT: "1rem", lg: "2rem", xl: "3rem", full: "9999px"}, fontFamily: {headline: ["Lexend"], body: ["Inter"], label: ["Inter"], display: "Lexend"}}}};</script>
+<style>
+        body {
+            background-color: #0c0e0f;
+            font-family: 'Inter', sans-serif;
+            color: #f6f6f7;
+            overflow-x: hidden;
+        }
+        .hud-glass {
+            background: rgba(12, 14, 15, 0.6);
+            backdrop-filter: blur(24px);
+        }
+        .massive-text {
+            letter-spacing: -0.04em;
+        }
+        .neon-glow-primary {
+            text-shadow: 0 0 15px rgba(142, 236, 244, 0.6);
+        }
+        .neon-glow-secondary {
+            box-shadow: 0 0 32px rgba(47, 248, 1, 0.25);
+        }
+        .tertiary-pulse {
+            background: rgba(254, 95, 0, 0.1);
+            color: #ff793e;
+        }
+        .map-gradient-overlay {
+            background: linear-gradient(to bottom, transparent 0%, #0c0e0f 100%);
+        }
+        .kinetic-path {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 0;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface selection:bg-primary selection:text-surface-container-lowest">
+<!-- Top Navigation Anchor -->
+<nav class="bg-[#0c0e0f]/60 backdrop-blur-[24px] flex justify-between items-center w-full px-6 py-4 fixed top-0 z-50">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-[#99f7ff] cursor-pointer">menu</span>
+<span class="font-['Lexend'] font-bold italic tracking-tighter text-2xl font-black italic text-[#99f7ff] uppercase tracking-[-0.02em]">RUNSPHERE</span>
+</div>
+<div class="w-10 h-10 rounded-full bg-surface-container-high overflow-hidden border-2 border-primary/20">
+<img class="w-full h-full object-cover" data-alt="close-up portrait of a high-performance athlete with intense focus and subtle perspiration on skin" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB1f6YedYRKnUF4TdttQjk66NcUcHo5HfRYdmnbly336UYnfnkcSrFKHtqyra4ScSDPztJeueWP_iuq9fp0_Mrtt6ecZeLtGyv-5ulCVoath96kY9njQH0n2Fy0xgGOMBdmuWaE1lgEcrba8Nj8kxXBbQj5lWpWt7iaXahAWVRmuj0ss0Ddg_eBKQHIw8gLaUjFo2qEM-qYfxex7FxQJzMMpWECn5Hm42XM-vJ4B5Z4PcAeJxvXiFajCeQJGpyiV9AzSg40FGr2tFM6"/>
+</div>
+</nav>
+<main class="min-h-screen pt-24 pb-32 px-6 flex flex-col items-center justify-between">
+<!-- Performance HUD: Top Metrics -->
+<div class="w-full max-w-lg space-y-8 flex flex-col items-center">
+<!-- Label HUD -->
+<div class="flex justify-between w-full">
+<div class="flex flex-col">
+<span class="font-label text-[0.75rem] font-bold uppercase tracking-[0.05em] text-on-surface-variant">Session Duration</span>
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-secondary animate-pulse"></div>
+<span class="font-body text-sm font-medium text-secondary">LIVE RECORDING</span>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-label text-[0.75rem] font-bold uppercase tracking-[0.05em] text-on-surface-variant">GPS Signal</span>
+<span class="font-body text-sm font-medium text-primary">ULTRA PRECISION</span>
+</div>
+</div>
+<!-- Massive Timer -->
+<div class="relative py-4">
+<h1 class="font-headline text-[5rem] md:text-[7rem] font-black italic leading-none massive-text text-on-background neon-glow-primary">
+                    00:42:18
+                </h1>
+<div class="absolute -bottom-2 right-0 bg-primary/10 px-3 py-1 rounded-full">
+<span class="font-label text-[0.65rem] font-black text-primary tracking-widest uppercase">Target 01:00:00</span>
+</div>
+</div>
+<!-- Secondary Stats Bento Grid -->
+<div class="grid grid-cols-2 gap-4 w-full">
+<div class="bg-surface-container-low p-6 rounded-lg flex flex-col items-center justify-center space-y-1">
+<span class="font-label text-[0.75rem] font-bold uppercase tracking-[0.05em] text-on-surface-variant">Distance</span>
+<div class="flex items-baseline gap-1">
+<span class="font-headline text-4xl font-bold text-on-background">6.42</span>
+<span class="font-headline text-lg font-bold text-primary">KM</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-6 rounded-lg flex flex-col items-center justify-center space-y-1">
+<span class="font-label text-[0.75rem] font-bold uppercase tracking-[0.05em] text-on-surface-variant">Current Pace</span>
+<div class="flex items-baseline gap-1">
+<span class="font-headline text-4xl font-bold text-on-background">4'58"</span>
+<span class="font-headline text-lg font-bold text-primary">/KM</span>
+</div>
+</div>
+</div>
+<!-- Heart Rate Accent -->
+<div class="w-full bg-tertiary-container/10 p-4 rounded-xl flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-tertiary-container" style="font-variation-settings: 'FILL' 1;">favorite</span>
+<span class="font-label text-[0.75rem] font-bold uppercase tracking-[0.05em] text-tertiary-container">Heart Rate</span>
+</div>
+<div class="flex items-baseline gap-1">
+<span class="font-headline text-2xl font-bold text-tertiary">164</span>
+<span class="font-body text-xs text-on-surface-variant">BPM</span>
+</div>
+</div>
+</div>
+<!-- Floating Map Container -->
+<div class="w-full max-w-lg mt-12 relative h-48 rounded-lg overflow-hidden group">
+<div class="absolute inset-0 bg-surface-container-high">
+<img class="w-full h-full object-cover opacity-40 mix-blend-luminosity" data-alt="dark high-contrast topographical map satellite view with neon teal glowing paths through a city grid at night" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA8KAs8D5aItnLtf_ryfY2MfCDRoaVLFHl6N1cEOrszsFH-XbpeP2hm93S8ZP_oBrTKyNOjMrPGbo7uokj6aezq-_ei08pyLOgURyQJhi4gzwJO32G5oHLRvwwhn3WmwnIvX11MCVd8S-F6_cUvil9rEFifjM0JKNnz_T8p2aRRmmS_lq_VAiuRsajbN6icu_7UEC3BYwDTj5SAh_1kAeRR0lKmdJAinJC1L98mYbOpUxhXf9TvthqT6tlPIB7Ih6ahum4iobeu0xF9"/>
+<div class="absolute inset-0 map-gradient-overlay"></div>
+<!-- Neon Route Overlay (Simplified visual representation) -->
+<svg class="absolute inset-0 w-full h-full" fill="none" viewbox="0 0 400 200">
+<path class="drop-shadow-[0_0_8px_rgba(153,247,255,0.8)]" d="M50 150C100 120 150 180 200 130C250 80 300 110 350 50" stroke="#99f7ff" stroke-linecap="round" stroke-width="4"></path>
+<circle class="drop-shadow-[0_0_12px_rgba(47,248,1,1)]" cx="350" cy="50" fill="#2ff801" r="6"></circle>
+</svg>
+</div>
+<div class="absolute top-4 left-4 hud-glass px-3 py-1 rounded-full border border-outline-variant/15">
+<span class="font-label text-[0.65rem] font-bold text-on-surface uppercase tracking-widest">Berlin City Route</span>
+</div>
+<div class="absolute bottom-4 right-4 hud-glass px-3 py-1 rounded-full border border-outline-variant/15 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-xs">location_on</span>
+<span class="font-label text-[0.65rem] font-bold text-on-surface">52.5200° N, 13.4050° E</span>
+</div>
+</div>
+<!-- Kinetic Triggers / Controls -->
+<div class="w-full max-w-lg flex items-center justify-center gap-12 mt-12">
+<!-- Secondary Trigger (Pause) -->
+<button class="w-20 h-20 rounded-full border-2 border-outline-variant flex items-center justify-center hover:bg-surface-container-high transition-all active:scale-90 duration-150">
+<span class="material-symbols-outlined text-on-surface text-3xl">pause</span>
+</button>
+<!-- Primary Kinetic Trigger (Stop/Finish) -->
+<button class="w-32 h-32 rounded-full bg-gradient-to-tr from-secondary to-[#00f1fe] p-1 neon-glow-secondary active:scale-95 transition-all">
+<div class="w-full h-full bg-surface-container-lowest rounded-full flex items-center justify-center group">
+<div class="w-[88%] h-[88%] bg-secondary rounded-full flex flex-col items-center justify-center text-on-secondary-fixed transition-transform group-hover:scale-105">
+<span class="material-symbols-outlined text-4xl" style="font-variation-settings: 'FILL' 1;">stop</span>
+<span class="font-label text-[0.65rem] font-black uppercase mt-1">Finish</span>
+</div>
+</div>
+</button>
+<!-- Tertiary HUD Toggle (Settings/Laps) -->
+<button class="w-20 h-20 rounded-full border-2 border-outline-variant flex items-center justify-center hover:bg-surface-container-high transition-all active:scale-90 duration-150">
+<span class="material-symbols-outlined text-on-surface text-3xl">history</span>
+</button>
+</div>
+</main>
+<!-- Bottom Navigation Shell -->
+<div class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-2 bg-[#0c0e0f]/60 backdrop-blur-[24px] rounded-t-[2rem] shadow-[0_-8px_32px_rgba(153,247,255,0.12)]">
+<div class="flex flex-col items-center justify-center text-slate-500 hover:text-[#99f7ff] transition-all">
+<span class="material-symbols-outlined">home</span>
+<span class="font-['Lexend'] text-[10px] font-bold uppercase tracking-[0.05em]">Home</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#99f7ff] drop-shadow-[0_0_8px_rgba(153,247,255,0.8)] scale-90 duration-150 ease-in-out">
+<span class="material-symbols-outlined">speed</span>
+<span class="font-['Lexend'] text-[10px] font-bold uppercase tracking-[0.05em]">Run</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-500 hover:text-[#99f7ff] transition-all">
+<span class="material-symbols-outlined">leaderboard</span>
+<span class="font-['Lexend'] text-[10px] font-bold uppercase tracking-[0.05em]">Ranks</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-500 hover:text-[#99f7ff] transition-all">
+<span class="material-symbols-outlined">groups</span>
+<span class="font-['Lexend'] text-[10px] font-bold uppercase tracking-[0.05em]">Social</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-500 hover:text-[#99f7ff] transition-all">
+<span class="material-symbols-outlined">person</span>
+<span class="font-['Lexend'] text-[10px] font-bold uppercase tracking-[0.05em]">Me</span>
+</div>
+</div>
+</body></html>

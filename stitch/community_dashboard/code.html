@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&amp;family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"on-primary-fixed-variant": "#006065", "on-primary-fixed": "#004145", "inverse-on-surface": "#545556", "secondary-fixed": "#2ff801", outline: "#747577", "on-tertiary-container": "#290900", "surface-container-low": "#111415", "on-surface-variant": "#aaabac", "tertiary-fixed-dim": "#ff7e46", "primary-fixed-dim": "#00e2ee", surface: "#0c0e0f", "secondary-fixed-dim": "#2be800", "tertiary-container": "#fe5f00", secondary: "#2ff801", "tertiary-dim": "#ff7436", "primary-fixed": "#00f1fe", "on-error": "#490006", "secondary-container": "#106e00", error: "#ff716c", "on-background": "#f6f6f7", "tertiary-fixed": "#ff9569", "surface-container-highest": "#232628", "on-tertiary-fixed": "#310c00", "on-secondary": "#0b5800", tertiary: "#ff793e", "on-tertiary-fixed-variant": "#682200", "surface-dim": "#0c0e0f", "surface-container-high": "#1d2021", "primary-dim": "#00e2ee", "on-secondary-container": "#e7ffd9", "on-secondary-fixed-variant": "#0d6200", "on-primary-container": "#00555a", "on-error-container": "#ffa8a3", "on-surface": "#f6f6f7", "surface-tint": "#99f7ff", "surface-bright": "#292d2e", "primary-container": "#00f1fe", "surface-container": "#171a1b", "secondary-dim": "#2be800", "error-container": "#9f0519", "surface-container-lowest": "#000000", "surface-variant": "#232628", "on-primary": "#005f64", "inverse-surface": "#f9f9fa", "on-tertiary": "#431300", "on-secondary-fixed": "#064200", primary: "#99f7ff", "inverse-primary": "#006a70", "error-dim": "#d7383b", background: "#0c0e0f", "outline-variant": "#464849"}, borderRadius: {DEFAULT: "1rem", lg: "2rem", xl: "3rem", full: "9999px"}, fontFamily: {headline: ["Lexend"], body: ["Inter"], label: ["Inter"], display: "Lexend"}}}};</script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .tonal-shift { background-color: #091328; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar Shell -->
+<header class="fixed top-0 w-full z-50 bg-[#060e20] backdrop-blur-xl bg-opacity-60 shadow-[0_0_20px_rgba(202,253,0,0.1)]">
+<nav class="flex justify-between items-center px-6 h-16">
+<div class="flex items-center gap-4">
+<button class="active:scale-95 duration-200 text-[#cafd00] hover:text-[#00e3fd] transition-colors">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+<h1 class="text-2xl font-black text-[#cafd00] italic font-['Lexend'] uppercase tracking-tighter">PULSE COMMUNITY</h1>
+</div>
+<div class="flex items-center gap-6">
+<!-- Desktop Nav Cluster -->
+<div class="hidden md:flex gap-8 font-['Lexend'] font-bold text-slate-400 uppercase tracking-widest text-xs">
+<a class="text-[#cafd00]" href="#">Feed</a>
+<a class="hover:text-[#00e3fd] transition-colors" href="#">Explore</a>
+<a class="hover:text-[#00e3fd] transition-colors" href="#">Challenges</a>
+<a class="hover:text-[#00e3fd] transition-colors" href="#">Clubs</a>
+</div>
+<div class="w-10 h-10 rounded-full border-2 border-primary-container overflow-hidden">
+<img alt="User" class="w-full h-full object-cover" data-alt="close-up portrait of a fit runner with sweat on brow, high contrast dramatic studio lighting, dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBqNPjYpTqrzoWJPGaj0BUj-06LR2VnR4vP3fDxEZB_RFB5ESIfWUfS2Ozie_oNet5MRdigihyQbm3VtO-TmejebkS_FQniRdlcOyH-qoT6UcXt6PSv38m59W2pBlp6H8Kd1QY_x_ueq5ZkfJ3Zx23FJPNI8HUfC-l1k7jZ94VeEM2P2pN4LLsh2w7lxgAIUx8kzkkPUZvZHm2PmVbhtLIM6G4ZHZ-69Td7oHx7kBqb2QzfYZ0PZrtL4ytRIGc_v9YKX4zM2Aprnepc"/>
+</div>
+</div>
+</nav>
+</header>
+<main class="pt-24 pb-32 px-6 max-w-7xl mx-auto space-y-12">
+<!-- Hero Section: Global Stats -->
+<section class="relative overflow-hidden rounded-lg bg-surface-container-low p-8 md:p-12">
+<div class="absolute top-0 right-0 w-1/2 h-full opacity-20 pointer-events-none">
+<div class="w-full h-full bg-gradient-to-l from-primary-container to-transparent blur-3xl"></div>
+</div>
+<div class="relative z-10 space-y-4">
+<div class="flex items-center gap-2">
+<span class="flex h-3 w-3 relative">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-fixed-dim opacity-75"></span>
+<span class="relative inline-flex rounded-full h-3 w-3 bg-primary-container"></span>
+</span>
+<span class="text-primary font-headline font-bold uppercase tracking-[0.2em] text-xs">Live Global Momentum</span>
+</div>
+<h2 class="font-headline text-6xl md:text-8xl font-black tracking-tighter leading-none">
+                    1.2 <span class="text-secondary">MILLION</span> <br/>
+<span class="text-primary-container">KM RUN TODAY</span>
+</h2>
+<p class="text-on-surface-variant max-w-md text-lg">The community is moving. Join the peak performance hours happening now across 142 countries.</p>
+<div class="pt-6">
+<button class="bg-gradient-to-br from-[#f3ffca] to-[#cafd00] text-[#3a4a00] px-8 py-4 rounded-xl font-headline font-black uppercase tracking-widest shadow-[0_0_30px_rgba(202,253,0,0.3)] hover:scale-105 transition-transform active:scale-95">
+                        Start Your Contribution
+                    </button>
+</div>
+</div>
+</section>
+<!-- Active Challenges: Bento Grid -->
+<section>
+<div class="flex justify-between items-end mb-8">
+<div>
+<h3 class="font-headline text-3xl font-bold uppercase italic tracking-tighter">Active Challenges</h3>
+<div class="h-1 w-12 bg-secondary mt-2"></div>
+</div>
+<a class="text-secondary font-headline font-bold text-sm uppercase tracking-widest hover:underline" href="#">View All</a>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Challenge Card 1 -->
+<div class="md:col-span-2 group relative overflow-hidden rounded-lg bg-surface-container-high p-8 flex flex-col justify-between aspect-[16/9] md:aspect-auto">
+<div class="absolute inset-0 opacity-40 group-hover:scale-110 transition-transform duration-700">
+<img alt="Runner" class="w-full h-full object-cover" data-alt="high speed shot of runner's legs in neon sneakers hitting the pavement with urban city lights blurred in background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBL9nk2en3SL4y80M0y8OKa8oWAXFMa9co6Nuqu1SGpnrKsBWC3ZEeBA9AQmbXRaWU178AE3fasHzA2pASo8gE96Sci_nwde6jnOADRcrRfphU-iwAaQ37oOSRQxhl_hF2o-ZE8GWmMc2Sg8tY6vCR4zwZfr_Nj4jIsbj9cDGSN68jtHA45e62ZtmeQ0_ImzPh-3xcdbXqnNa8r5t7_L6_2DG7vcl6XN5dnAMU7ILivo8SyJt4yLhTybBsx-Ni60EsHwMdUirWYm0C9"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-high via-surface-container-high/60 to-transparent"></div>
+</div>
+<div class="relative flex justify-between items-start">
+<span class="bg-secondary text-on-secondary px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest">Global Elite</span>
+<div class="text-right">
+<p class="text-xs font-bold text-on-surface-variant uppercase">Time Left</p>
+<p class="text-xl font-headline font-black text-primary-container">04:12:45</p>
+</div>
+</div>
+<div class="relative">
+<h4 class="text-4xl font-headline font-black italic uppercase leading-none mb-4">Midnight City <br/>Sprint Series</h4>
+<div class="w-full bg-white/10 h-3 rounded-full overflow-hidden">
+<div class="bg-primary-container h-full w-[65%] shadow-[0_0_15px_rgba(202,253,0,0.5)]"></div>
+</div>
+<p class="mt-2 text-sm font-bold text-primary">65% Completed • 8,402 Participants</p>
+</div>
+</div>
+<!-- Challenge Card 2 -->
+<div class="bg-surface-container-high rounded-lg p-6 flex flex-col justify-between border-l-4 border-primary-container">
+<div>
+<div class="flex justify-between items-center mb-6">
+<span class="material-symbols-outlined text-primary-container scale-150" data-icon="energy_savings_leaf">energy_savings_leaf</span>
+<span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.2em]">New</span>
+</div>
+<h4 class="text-2xl font-headline font-black italic uppercase leading-tight">Elevation <br/>Mastery</h4>
+<p class="text-sm text-on-surface-variant mt-2">Climb 500m total over 48 hours to unlock the 'Skybound' badge.</p>
+</div>
+<div class="mt-8">
+<p class="text-xs font-bold uppercase text-on-surface-variant mb-2">My Progress</p>
+<div class="flex items-end gap-2">
+<span class="text-4xl font-headline font-black text-on-surface">112</span>
+<span class="text-sm font-bold text-on-surface-variant mb-1">/ 500m</span>
+</div>
+<button class="w-full mt-6 py-3 rounded-full border border-outline-variant hover:bg-surface-container-highest transition-colors font-headline font-bold uppercase text-xs tracking-widest">Record Run</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Trending Clubs: Horizontal Scroll -->
+<section>
+<h3 class="font-headline text-3xl font-bold uppercase italic tracking-tighter mb-8">Trending Clubs</h3>
+<div class="flex overflow-x-auto gap-8 no-scrollbar pb-4 snap-x">
+<!-- Club Item -->
+<div class="flex-none snap-center flex flex-col items-center group cursor-pointer">
+<div class="w-24 h-24 rounded-full p-1 bg-gradient-to-tr from-secondary to-primary-container group-hover:scale-110 transition-transform">
+<div class="w-full h-full rounded-full border-4 border-surface overflow-hidden">
+<img alt="Club" class="w-full h-full object-cover" data-alt="abstract logo for a running club with bold geometric shapes in neon cyan and midnight navy" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCLbmo3pzzuFXrQpylNOjpewiCPTzWYAg-xO6XO_zYmF691qkxvVMo5ujFcZ7WWnJcjdC8jnb1RfP4q_xalqJiq6GFFZwXwMWNg9EgRQwh6gUoFL0J878xFvMEf72-vDMb_bVH1mM_BkRb9HbgQDPpFduNuHlZEmWiezWwSwtremqwCcZgqvoU3iFGXQHZqDtuy12PdaiNo_afAh1XqC7FX1b1v3afymGeFYAAdzyJ5K2k0rBaOxK_-fNO96WqMc3D6feYUb9LSsrmc"/>
+</div>
+</div>
+<p class="mt-4 font-headline font-bold text-xs uppercase tracking-widest text-center">Neon Knights</p>
+<p class="text-[10px] text-on-surface-variant uppercase font-bold">Berlin • 1.2k</p>
+</div>
+<!-- Repeat Club Items -->
+<div class="flex-none snap-center flex flex-col items-center group cursor-pointer">
+<div class="w-24 h-24 rounded-full p-1 bg-outline-variant group-hover:bg-secondary transition-all">
+<div class="w-full h-full rounded-full border-4 border-surface overflow-hidden">
+<img alt="Club" class="w-full h-full object-cover" data-alt="minimalist mountain silhouette icon for a trail running group with atmospheric lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDbimw_gm9w5KM34XtKSkqb4L6VZFCDEPSEA9GqQjF612D9hGwT8562QcVXD9mPGVxtqV_YTtuzU2cBUh8EcDUaAlrvzdb_1bG1uUgOfXfHZl5DyqcDIEEJEZ9-UZTIVRhhzsplImQOST4PxQdP5ln8LjDRt6RuVaLPcTOJ4l6Lawt1ZYtEgSPph4xUNjHWXxswPOXO0A2jbqvCtrVoWsBb6vt56X6M636-JvZYUWWDzYG6EaJnRHNfu3Wn-GETJ7XNbg2jGGMCl9Ic"/>
+</div>
+</div>
+<p class="mt-4 font-headline font-bold text-xs uppercase tracking-widest text-center">Summit Squad</p>
+<p class="text-[10px] text-on-surface-variant uppercase font-bold">Denver • 850</p>
+</div>
+<div class="flex-none snap-center flex flex-col items-center group cursor-pointer">
+<div class="w-24 h-24 rounded-full p-1 bg-outline-variant group-hover:bg-primary-container transition-all">
+<div class="w-full h-full rounded-full border-4 border-surface overflow-hidden">
+<img alt="Club" class="w-full h-full object-cover" data-alt="overhead view of professional running track with vibrant yellow lane lines and deep blue surface" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDhT5bw55vNqwxtgV2-Z0QhfqT-w4Ldk3IO7EcPVpsXNzE_82TZTmnV3nS0-kNZ9F2_CuShpDgnEhNXX1nVRNF0aaYRofOkc1jdWwjkl2y1C12o_rIHKr3gp8pf_2yJHifAElav6Cwuz1Zp4rrf8necRfyLCO1QGYyfdGoyugDuIfScCR-P81N3CXIZNXS1pOFIbSxJpzoKndiyItqem4bBOkd4joeFGEJvuGkN8O5rR1QQgA8ExqZDGyOpkCqo1sEwAqC-3n5DnE6z"/>
+</div>
+</div>
+<p class="mt-4 font-headline font-bold text-xs uppercase tracking-widest text-center">Track Kings</p>
+<p class="text-[10px] text-on-surface-variant uppercase font-bold">London • 2.4k</p>
+</div>
+<div class="flex-none snap-center flex flex-col items-center group cursor-pointer">
+<div class="w-24 h-24 rounded-full p-1 bg-outline-variant group-hover:bg-secondary transition-all">
+<div class="w-full h-full rounded-full border-4 border-surface overflow-hidden">
+<img alt="Club" class="w-full h-full object-cover" data-alt="group of energetic runners high-fiving at sunset, silhouettes against a vibrant orange and purple sky" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDzJ7PGUZh6HjsKs7AOSJvf7rNVGC-CeY2yIYb9hFwDU1Wui2FWxu7yUF3v4GEAvo5O4bZEQ3xb4ubnIQlzWRYHYtBPeU_pZA6ipKNE78hYwBhcsAIFJQL_ZO7IwrtcuomDaugNSlr2aWdXjb5y1CaDOwV43IB7Q3w2RkTWPYG1uITQkc3SeEkFQSwdmyTEPAhsSLeMYIPsfIY-kuePDvNUYk57EO6l-ja2-XgUwbZXD0QiW59oVj1wbyjhNvuMh30PknVEIeVrU7-S"/>
+</div>
+</div>
+<p class="mt-4 font-headline font-bold text-xs uppercase tracking-widest text-center">Aero Runners</p>
+<p class="text-[10px] text-on-surface-variant uppercase font-bold">Tokyo • 620</p>
+</div>
+<div class="flex-none snap-center flex flex-col items-center group cursor-pointer">
+<div class="w-24 h-24 rounded-full p-1 bg-outline-variant group-hover:bg-primary-container transition-all">
+<div class="w-full h-full rounded-full border-4 border-surface overflow-hidden">
+<img alt="Club" class="w-full h-full object-cover" data-alt="urban street art background with vibrant graffiti and a running shoe silhouette in white stencil" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAqXC9WJ7RwlPpr9QdEJZ1_znBc1Sb7ZSFHOEpBRkWAeFC8IqCX5grW3C5nwA_8fD7eqjHcsw7GeJgAn2PA3E0NwFWkpxEuzGAizFIgCppPWltKdU6OicEoIySKMtvt2T6CfArKyz61TRaGEOKhSjCY7KzaOa-tTo7C_oHJwtyFBiF7YChdS9EUvnTv4P0EvQvizLQdcXrKVFM-v6_wdW8OVHXIA3da3xBaJ5lbZVy4Dr_peMUZNGx1_kfQPjrCKFybMeeaRfDf4J4g"/>
+</div>
+</div>
+<p class="mt-4 font-headline font-bold text-xs uppercase tracking-widest text-center">City Flow</p>
+<p class="text-[10px] text-on-surface-variant uppercase font-bold">NYC • 3.1k</p>
+</div>
+</div>
+</section>
+<!-- Upcoming Group Runs -->
+<section>
+<div class="flex justify-between items-end mb-8">
+<div>
+<h3 class="font-headline text-3xl font-bold uppercase italic tracking-tighter">Upcoming Group Runs</h3>
+<div class="h-1 w-12 bg-primary-container mt-2"></div>
+</div>
+</div>
+<div class="space-y-4">
+<!-- Group Run Row 1 -->
+<div class="group flex flex-col md:flex-row items-center gap-6 p-6 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors">
+<div class="flex flex-col items-center justify-center bg-surface-container-lowest w-20 h-20 rounded-xl border border-outline-variant">
+<span class="text-xs font-bold text-secondary uppercase">Oct</span>
+<span class="text-3xl font-headline font-black text-on-surface">24</span>
+</div>
+<div class="flex-1 text-center md:text-left">
+<h5 class="text-xl font-headline font-bold uppercase tracking-tight">Riverside Recovery 10K</h5>
+<p class="text-on-surface-variant flex items-center justify-center md:justify-start gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="location_on">location_on</span>
+                            South Bank, London • 06:30 AM
+                        </p>
+</div>
+<div class="flex -space-x-3 items-center">
+<div class="w-8 h-8 rounded-full border-2 border-surface bg-slate-800 flex items-center justify-center overflow-hidden">
+<img alt="Attendee" data-alt="portrait of a runner with reflective glasses and neon hat" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBAlVwolv69uyqxopwipwclw1hwDBt64-GYAb86shKMgCiFUadxpWgXSi9J7pPZEufd8BpqmN58O36ZhSiNQ8W4lwVr3Gj2NYx55km72H7swVzDL8KczjMw5c8Hqv-CT1Ke0OHd_TjqAfENdud_l4dZbBSft2TA4y-Hw08INnFvZu1ZkN0Jkri7m15E8ecJc7czQfMfUAEXWrZkjp7L2IvP8LhguhpBjFjRPjv6xDfSYYZp4OIeVgYNQSCREqEYE9NosHHT9vSDmIoT"/>
+</div>
+<div class="w-8 h-8 rounded-full border-2 border-surface bg-slate-800 flex items-center justify-center overflow-hidden">
+<img alt="Attendee" data-alt="action shot of runner's smiling face under streetlights" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBV-FcJYIoFC4pEQeoRxyGkVLt3_of0wzK_pG7hYTbC9q8Zdhz0lM5mV57bXpt9KAr9_Oqu77GciSr9BvbH1jPf7LLtpTjUgpieN7ueWR0VBxYXNS_qAmL-lpinjfURxVIsIfR8NPdIP2An22dBqOBKlgwrH9_rCNVemht56Wf7QXJef-F8HR1zOAwo0OlxrnD4d6IZQ7DX6VZl8uVYM4Xhcw6hHezH7Zv5Wwnz2RHV067mxql3UrVRmGKzsDtUJrBU4Kxqr-vxMU0D"/>
+</div>
+<div class="w-8 h-8 rounded-full border-2 border-surface bg-slate-800 flex items-center justify-center overflow-hidden">
+<img alt="Attendee" data-alt="profile shot of female runner with braided hair and high-vis vest" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDMAi356kDXMptyMR32MzjBGQPEgGyWbwQHEao1SazgF8F9ZsFFsXgDOsVBtzWqV-Ak4dIWLxLmsu226RhgEUVx0M1xq1bidi0_mOE_Z82eN2LIMSbUXFuELQJcDtVqok5qlDS6TyBKQT5NdZVzt4b4CFvD3XdfUPa4HeFY9IcAZGutzNMGyjaHuyIBRZHADM6lm5p-b5ispy9xGmC2dsVDdLqK5n0fcjWX0gIx0K7J1bDpG2JoYrzyCrVx8cHmuEGl_bcPFfXom-0h"/>
+</div>
+<span class="pl-5 text-xs font-bold text-on-surface-variant">+42 Joined</span>
+</div>
+<button class="bg-primary-container text-on-primary-fixed font-headline font-black uppercase text-xs tracking-widest px-8 py-3 rounded-full hover:scale-105 transition-transform active:scale-95">Join Run</button>
+</div>
+<!-- Group Run Row 2 -->
+<div class="group flex flex-col md:flex-row items-center gap-6 p-6 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors">
+<div class="flex flex-col items-center justify-center bg-surface-container-lowest w-20 h-20 rounded-xl border border-outline-variant">
+<span class="text-xs font-bold text-secondary uppercase">Oct</span>
+<span class="text-3xl font-headline font-black text-on-surface">26</span>
+</div>
+<div class="flex-1 text-center md:text-left">
+<h5 class="text-xl font-headline font-bold uppercase tracking-tight">Neon Night Trail</h5>
+<p class="text-on-surface-variant flex items-center justify-center md:justify-start gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="location_on">location_on</span>
+                            Richmond Park • 08:45 PM
+                        </p>
+</div>
+<div class="flex -space-x-3 items-center">
+<div class="w-8 h-8 rounded-full border-2 border-surface bg-slate-800 flex items-center justify-center overflow-hidden">
+<img alt="Attendee" data-alt="close up of runner checking glowing smartwatch on dark trail" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDr8gSDPEt024vBpEz-blRhYrHCNW9Z11uvbZp3QU9yzqjcYG_L3fYdU1XNyU1lBj5_LJIT4ruwTwf2PIVbDAIcvWPqeWoyL85Ca2XxR55r3y7Ro-kzKdRiS6W3sI4xdOalpSVrJ1D3akFqoPFokiegLtiDtJRcPDwHGDNUkxiCCfD2sTVDD9fGGtky_VQqA_36Kxc_7crDBdt8DE1M25vHr-VNezhKHHH42QeEFATe2yazf9w0rMelGA8wgAszQPeoxoxyktWG-aoa"/>
+</div>
+<div class="w-8 h-8 rounded-full border-2 border-surface bg-slate-800 flex items-center justify-center overflow-hidden">
+<img alt="Attendee" data-alt="blurry motion shot of light trails from headlamps in a forest" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDV0qQC3e-dunU73Ddz3l54ID7DUWTC664z1fqIG3OQFSvOtv8dNXp9jRWaCtzJ1x5a09yIDdkZe8HK05JV4SVg8MbKprxw41GwdcrUkout5plUGLpn2mWIK4JEV3cW343O7aSnLuq4Fu-Rwn594W7JF_o0vq3JiyFjdm5B7JZajuenYql4qa43GhDQ9mTckNaonELQct4qlVlu80LCezl5ruu3KgwF-hq8MATQIdn_4rl_KZQ5EfH0H9RgERIymYr1j0ftoXH2uZwk"/>
+</div>
+<span class="pl-5 text-xs font-bold text-on-surface-variant">+15 Joined</span>
+</div>
+<button class="bg-primary-container text-on-primary-fixed font-headline font-black uppercase text-xs tracking-widest px-8 py-3 rounded-full hover:scale-105 transition-transform active:scale-95">Join Run</button>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar Shell -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-3 bg-[#060e20] backdrop-blur-2xl bg-opacity-80 z-50 md:hidden shadow-[0_-4px_24px_rgba(0,0,0,0.4)] rounded-t-[3rem]">
+<a class="flex flex-col items-center justify-center text-slate-500 py-2 hover:text-[#f3ffca]" href="#">
+<span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
+<span class="font-['Lexend'] text-[10px] font-bold uppercase mt-1">Feed</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-gradient-to-br from-[#f3ffca] to-[#cafd00] text-[#3a4a00] rounded-full px-6 py-2 shadow-[0_0_15px_rgba(202,253,0,0.4)] active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="explore">explore</span>
+<span class="font-['Lexend'] text-[10px] font-bold uppercase mt-1">Explore</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 py-2 hover:text-[#f3ffca]" href="#">
+<span class="material-symbols-outlined" data-icon="emoji_events">emoji_events</span>
+<span class="font-['Lexend'] text-[10px] font-bold uppercase mt-1">Challenges</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 py-2 hover:text-[#f3ffca]" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-['Lexend'] text-[10px] font-bold uppercase mt-1">Profile</span>
+</a>
+</nav>
+</body></html>

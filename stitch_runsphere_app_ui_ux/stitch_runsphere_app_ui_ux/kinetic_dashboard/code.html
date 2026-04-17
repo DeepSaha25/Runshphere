@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RunSphere | Kinetic Performance Engine</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;700;800;900&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"on-surface-variant": "#aaabac", "inverse-surface": "#f9f9fa", "on-secondary-fixed": "#064200", "error-container": "#9f0519", "inverse-on-surface": "#545556", "on-tertiary": "#431300", surface: "#0c0e0f", "surface-tint": "#99f7ff", "secondary-fixed-dim": "#2be800", "on-error-container": "#ffa8a3", "surface-container-high": "#1d2021", "secondary-fixed": "#2ff801", secondary: "#2ff801", "outline-variant": "#464849", "on-secondary-container": "#e7ffd9", "surface-container-highest": "#232628", "secondary-dim": "#2be800", "on-tertiary-fixed-variant": "#682200", primary: "#99f7ff", "primary-fixed": "#00f1fe", "on-background": "#f6f6f7", "on-secondary": "#0b5800", "error-dim": "#d7383b", "surface-container-lowest": "#000000", "on-secondary-fixed-variant": "#0d6200", "surface-dim": "#0c0e0f", tertiary: "#ff793e", "on-tertiary-fixed": "#310c00", "on-primary-fixed": "#004145", "surface-variant": "#232628", "on-primary-container": "#00555a", "primary-fixed-dim": "#00e2ee", background: "#0c0e0f", "tertiary-fixed": "#ff9569", "primary-container": "#00f1fe", "on-error": "#490006", "tertiary-fixed-dim": "#ff7e46", outline: "#747577", "tertiary-container": "#fe5f00", "primary-dim": "#00e2ee", error: "#ff716c", "on-primary": "#005f64", "surface-container-low": "#111415", "on-surface": "#f6f6f7", "secondary-container": "#106e00", "inverse-primary": "#006a70", "on-primary-fixed-variant": "#006065", "surface-bright": "#292d2e", "tertiary-dim": "#ff7436", "surface-container": "#171a1b", "on-tertiary-container": "#290900"}, borderRadius: {DEFAULT: "1rem", lg: "2rem", xl: "3rem", full: "9999px"}, fontFamily: {headline: ["Lexend"], body: ["Inter"], label: ["Inter"], display: "Lexend"}}}};</script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .kinetic-gradient {
+            background: linear-gradient(135deg, #99f7ff 0%, #00f1fe 100%);
+        }
+        .hud-blur {
+            backdrop-filter: blur(24px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body selection:bg-primary selection:text-on-primary-container">
+<!-- Top Navigation Shell -->
+<header class="fixed top-0 left-0 w-full z-50 bg-[#0c0e0f]/60 backdrop-blur-[24px] flex justify-between items-center px-6 py-4">
+<div class="flex items-center gap-4">
+<button class="text-[#99f7ff] hover:opacity-80 transition-opacity active:scale-95 duration-200">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<h1 class="text-2xl font-black italic text-[#99f7ff] uppercase tracking-[-0.02em] font-headline">RUNSPHERE</h1>
+</div>
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary/20">
+<img class="w-full h-full object-cover" data-alt="portrait of a determined male athlete with athletic headband and outdoor training attire" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDN3VfEa7BLl4_KkLsg3BZAoRyRAsa_wQ-qQ5FK-kQio7zfMkleavIgrC5keZxDw3PkDkH1z1fFIO0jQqmEv6-y2tIHxNlmgLngsNZAgM5DVE1KcrvOcdjKCtsx-7aesqMBZDIJxQlwx5-hs_OvwlfbvwjvvrUtxmpLDRY6lAYD0HGv-1yktXInbbn6t__Jazr2a6iUb73pDhwW9Q0P1LdMJaqUch48anjybfZ-8RwRW74HngHoVSHG2BYv6imweJLGacAlUoenzJ9R"/>
+</div>
+</div>
+</header>
+<main class="relative pt-24 pb-32 min-h-screen overflow-x-hidden">
+<!-- Background Map Texture -->
+<div class="fixed inset-0 pointer-events-none z-0 opacity-20">
+<img class="w-full h-full object-cover grayscale invert" data-alt="abstract minimalist city map blueprint with deep charcoal lines on dark blue background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAF5LWdz8RC7eUJcuirl2S2P_Y3Pg2Dmoj4bj8_5lBXpOdtoKTCP6v2aGO0tI0fWk1o7pAXBDi52OSvWAj3CG5ojn87hHm9bxMO922LqFxUYMwyNcDrLGokmzDagZL0FVoEK_O7jtu1Gmz4rf3ll6LRc7VCmZKnrwTHvoO_zr4Jpisf8BMYMxuFLEVlnL4P6002dSifY3V07DshEYlPFpS7gZRKq0_ltCTFjHjM6fdl29nyu_PSJG_rFjkhAaJ5ARfcfz5QuVgcKvCD"/>
+</div>
+<div class="relative z-10 px-6 max-w-5xl mx-auto space-y-12">
+<!-- Hero Metrics -->
+<section class="flex flex-col gap-1">
+<p class="font-label text-[0.75rem] font-bold uppercase tracking-[0.1em] text-primary/60">TODAY'S DISTANCE</p>
+<h2 class="font-headline font-black italic text-[5.5rem] md:text-[8rem] leading-[0.8] tracking-tighter text-on-background flex items-baseline">
+                    12.4 <span class="text-2xl md:text-4xl ml-2 font-bold tracking-normal opacity-40 not-italic">KM</span>
+</h2>
+</section>
+<!-- Kinetic Action Trigger -->
+<section class="flex justify-start">
+<button class="kinetic-gradient text-on-primary-container px-12 py-5 rounded-xl font-headline font-black text-xl italic uppercase tracking-wider shadow-[0_0_32px_rgba(153,247,255,0.2)] hover:opacity-90 active:scale-[0.96] transition-all flex items-center gap-3">
+                    START RUN
+                    <span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</button>
+</section>
+<!-- Performance Bento Grid -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- Last Run Card -->
+<div class="bg-surface-container-high rounded-lg p-8 flex flex-col justify-between min-h-[220px] transition-all hover:bg-surface-container-highest group">
+<div>
+<p class="font-label text-[0.7rem] font-bold uppercase tracking-[0.1em] text-on-surface-variant mb-2">LAST PERFORMANCE</p>
+<h3 class="font-headline text-3xl font-bold italic text-on-surface">Sunset Sprint</h3>
+</div>
+<div class="flex justify-between items-end">
+<div class="flex flex-col">
+<span class="text-4xl font-headline font-bold text-primary">04:22</span>
+<span class="font-label text-[0.65rem] text-on-surface-variant uppercase">PACE / KM</span>
+</div>
+<div class="w-14 h-14 rounded-full bg-surface-container-highest flex items-center justify-center text-primary group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform">
+<span class="material-symbols-outlined text-3xl">trending_up</span>
+</div>
+</div>
+</div>
+<!-- Active Time Card -->
+<div class="bg-surface-container-high rounded-lg p-8 flex flex-col justify-between min-h-[220px]">
+<div>
+<p class="font-label text-[0.7rem] font-bold uppercase tracking-[0.1em] text-on-surface-variant mb-2">ACTIVE TIME / WEEK</p>
+<h3 class="font-headline text-5xl font-black italic text-secondary">5.2 <span class="text-base font-bold tracking-normal not-italic opacity-60">HRS</span></h3>
+</div>
+<div class="space-y-4">
+<div class="w-full h-3 bg-surface-container-lowest rounded-full overflow-hidden">
+<div class="h-full bg-secondary rounded-full shadow-[0_0_12px_rgba(47,248,1,0.5)]" style="width: 78%"></div>
+</div>
+<div class="flex justify-between font-label text-[0.65rem] text-on-surface-variant uppercase">
+<span>Goal: 6.0 HRS</span>
+<span class="text-secondary">78% Achieved</span>
+</div>
+</div>
+</div>
+<!-- Squad Rank Card -->
+<div class="bg-surface-container-high rounded-lg p-8 flex flex-col justify-between min-h-[220px] md:col-span-2 lg:col-span-1">
+<div>
+<p class="font-label text-[0.7rem] font-bold uppercase tracking-[0.1em] text-on-surface-variant mb-2">LOCAL SQUAD RANK</p>
+<h3 class="font-headline text-5xl font-black italic text-tertiary">#14</h3>
+</div>
+<div class="flex items-center -space-x-3">
+<img class="w-10 h-10 rounded-full border-2 border-surface-container-high" data-alt="portrait avatar of a runner athlete" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZvMK2KAfa1w85Q29GzUsJx37cFwPaquoN3CGqEWmwGSx3txftXihHrdH7YPJnuxq9rMqgCM6FEkHJdmWP6R7ik6tWtS_5KBDO8MTnU56YLCbvZmoY6d7238F2GRtLfb-QUDpFmdP4JBCTC68LA0ECCIhG7Dsk1HA9RtBKIup0rGTo25-yXp58rhqTW23y1FAF9LvlZw1tCYlnOMqZ9262DNg4T7g5fkz4yk7j1OlH91SyfUNP2FLS9hHoXvpGuACl0I-AP4gCWOy6"/>
+<img class="w-10 h-10 rounded-full border-2 border-surface-container-high" data-alt="portrait avatar of a female marathon runner" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCEpV_ZRz7ccA-6afYI_Iu3rqAIynPn7rzLzb6_DBMXFq1dSDp7WjTxmnhrPJpGfBu6gLFtq1s-9YYfIFHbPF9uc_ihDTv8zrMewuxtpTrONP3AlG-0hq1qXOAX1yz5b6Jy0TAyXU1y7USdSzCM7O3wTND9Yo7L2ubNOXTCM9EJiMruVl5-ZacMVUyx-wsuBJl-NbSWq3NRx7VKW9vGXnm-QjetLODWezCzk_XwvBRK_FSYud-iHc5RKJD61wsIDmwqSfzIE2MCU__j"/>
+<img class="w-10 h-10 rounded-full border-2 border-surface-container-high" data-alt="portrait avatar of a trail runner" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZ2glr49QRnvUE7f7r-FBcDvOhk64giB_qtUHwewjzaHMoEXqgkPkfIQCs8L-KGmK9Rc012UO8Mle8EGrkoKJlu-97BwdTFQrNGpRwceD6_jdMe_xpZQbLJpWtNgqD97S6icFYokunxpxwWMv1TJE5qOaPL-3HJv-wl1EEDhpcbtgf6rnYJ0IfouZ7kAczTTGkK58M3M7Q0M_NMr4N4sbnEMKDnZLjPm3nM_wHeZM6_4fip9X_bu_R-6sAqnTtuawdJrZcAa-vYWvL"/>
+<div class="w-10 h-10 rounded-full border-2 border-surface-container-high bg-surface-container-highest flex items-center justify-center text-[0.7rem] font-bold text-on-surface-variant">+82</div>
+<span class="ml-6 font-label text-[0.75rem] text-on-surface-variant font-medium">Top 5% of your city</span>
+</div>
+</div>
+</section>
+<!-- Map Context Section (HUD Style) -->
+<section class="bg-surface-container-low rounded-lg overflow-hidden h-[300px] relative">
+<div class="absolute inset-0 z-0">
+<img class="w-full h-full object-cover" data-alt="top down dark satellite map view of urban city grid with neon blue highlighted paths" data-location="New York" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBO0nxRiiaFGe7NcBsFC1eRj1kr69dZxt7uTuvWhWVY3W-v36lPyNB3IG2rVIIsoBNtEUVj8wDZBmxplxlQFJZuQQ6rZnMT5Z67WIBArgTBQ0lt3ZMtLFsbJjslBPs_FzKJ_COLG_sowbyiKswrqcWbiMOwYB1ru7JcalIj1UPcnA5X6FRKo5egC-oYWBjLG65VIu-ot_YWThX7o7ruwGgN_IDVDDoi6KJQHIORBId_z1_TD8hqAJLnf-tnsUq5bfpmqooQFhh2sKWb"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-low via-transparent to-transparent"></div>
+</div>
+<div class="relative z-10 p-8 flex flex-col justify-end h-full">
+<div class="flex items-center gap-3 mb-2">
+<span class="w-3 h-3 rounded-full bg-primary animate-pulse"></span>
+<p class="font-label text-xs font-bold uppercase tracking-widest text-on-surface">LIVE TRACKING ACTIVE</p>
+</div>
+<p class="text-on-surface-variant text-sm max-w-xs">3 active runners in your 2km radius. Push harder to lead the pack.</p>
+</div>
+</section>
+</div>
+</main>
+<!-- Bottom Navigation Shell -->
+<nav class="fixed bottom-0 left-0 w-full z-50 bg-[#0c0e0f]/60 backdrop-blur-[24px] rounded-t-[2rem] flex justify-around items-center px-4 pb-6 pt-2 shadow-[0_-8px_32px_rgba(153,247,255,0.12)]">
+<a class="flex flex-col items-center justify-center text-[#99f7ff] drop-shadow-[0_0_8px_rgba(153,247,255,0.8)] transition-all" href="#">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-headline text-[10px] font-bold uppercase tracking-[0.05em] mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 hover:text-[#99f7ff] transition-all" href="#">
+<span class="material-symbols-outlined text-2xl">speed</span>
+<span class="font-headline text-[10px] font-bold uppercase tracking-[0.05em] mt-1">Run</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 hover:text-[#99f7ff] transition-all" href="#">
+<span class="material-symbols-outlined text-2xl">leaderboard</span>
+<span class="font-headline text-[10px] font-bold uppercase tracking-[0.05em] mt-1">Ranks</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 hover:text-[#99f7ff] transition-all" href="#">
+<span class="material-symbols-outlined text-2xl">groups</span>
+<span class="font-headline text-[10px] font-bold uppercase tracking-[0.05em] mt-1">Social</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 hover:text-[#99f7ff] transition-all" href="#">
+<span class="material-symbols-outlined text-2xl">person</span>
+<span class="font-headline text-[10px] font-bold uppercase tracking-[0.05em] mt-1">Me</span>
+</a>
+</nav>
+</body></html>

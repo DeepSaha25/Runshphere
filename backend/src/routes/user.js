@@ -1,0 +1,29 @@
+const express = require('express');
+const authenticate = require('../middlewares/auth');
+const { validateLocationUpdate } = require('../middlewares/validators');
+const { getProfile, updateLocation, getStats } = require('../controllers/userController');
+
+const router = express.Router();
+
+// All routes require authentication
+router.use(authenticate);
+
+/**
+ * GET /api/user/profile
+ * Get user profile
+ */
+router.get('/profile', getProfile);
+
+/**
+ * PUT /api/user/location
+ * Update user location
+ */
+router.put('/location', validateLocationUpdate, updateLocation);
+
+/**
+ * GET /api/user/stats
+ * Get user stats
+ */
+router.get('/stats', getStats);
+
+module.exports = router;

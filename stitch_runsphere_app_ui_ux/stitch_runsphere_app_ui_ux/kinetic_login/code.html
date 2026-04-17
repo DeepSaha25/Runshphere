@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;700;800;900&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"on-surface-variant": "#aaabac", "inverse-surface": "#f9f9fa", "on-secondary-fixed": "#064200", "error-container": "#9f0519", "inverse-on-surface": "#545556", "on-tertiary": "#431300", surface: "#0c0e0f", "surface-tint": "#99f7ff", "secondary-fixed-dim": "#2be800", "on-error-container": "#ffa8a3", "surface-container-high": "#1d2021", "secondary-fixed": "#2ff801", secondary: "#2ff801", "outline-variant": "#464849", "on-secondary-container": "#e7ffd9", "surface-container-highest": "#232628", "secondary-dim": "#2be800", "on-tertiary-fixed-variant": "#682200", primary: "#99f7ff", "primary-fixed": "#00f1fe", "on-background": "#f6f6f7", "on-secondary": "#0b5800", "error-dim": "#d7383b", "surface-container-lowest": "#000000", "on-secondary-fixed-variant": "#0d6200", "surface-dim": "#0c0e0f", tertiary: "#ff793e", "on-tertiary-fixed": "#310c00", "on-primary-fixed": "#004145", "surface-variant": "#232628", "on-primary-container": "#00555a", "primary-fixed-dim": "#00e2ee", background: "#0c0e0f", "tertiary-fixed": "#ff9569", "primary-container": "#00f1fe", "on-error": "#490006", "tertiary-fixed-dim": "#ff7e46", outline: "#747577", "tertiary-container": "#fe5f00", "primary-dim": "#00e2ee", error: "#ff716c", "on-primary": "#005f64", "surface-container-low": "#111415", "on-surface": "#f6f6f7", "secondary-container": "#106e00", "inverse-primary": "#006a70", "on-primary-fixed-variant": "#006065", "surface-bright": "#292d2e", "tertiary-dim": "#ff7436", "surface-container": "#171a1b", "on-tertiary-container": "#290900"}, borderRadius: {DEFAULT: "1rem", lg: "2rem", xl: "3rem", full: "9999px"}, fontFamily: {headline: ["Lexend"], body: ["Inter"], label: ["Inter"], display: "Lexend"}}}};</script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .neon-glow {
+            box-shadow: 0 0 32px rgba(153, 247, 255, 0.12);
+        }
+        .primary-gradient {
+            background: linear-gradient(135deg, #99f7ff 0%, #00f1fe 100%);
+        }
+        .kinetic-bg {
+            background: radial-gradient(circle at 80% 20%, rgba(153, 247, 255, 0.05) 0%, transparent 40%),
+                        radial-gradient(circle at 20% 80%, rgba(254, 95, 0, 0.05) 0%, transparent 40%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body selection:bg-primary selection:text-on-primary-container min-h-screen flex flex-col kinetic-bg overflow-hidden">
+<!-- Hero Background Element -->
+<div class="fixed inset-0 z-0 pointer-events-none opacity-40">
+<div class="absolute top-[-10%] right-[-10%] w-[600px] h-[600px] rounded-full blur-[120px] bg-primary/10"></div>
+<div class="absolute bottom-[-5%] left-[-5%] w-[400px] h-[400px] rounded-full blur-[100px] bg-tertiary-container/10"></div>
+</div>
+<main class="flex-grow flex items-center justify-center px-6 relative z-10">
+<div class="w-full max-w-md">
+<!-- Branding/Identity -->
+<div class="mb-12">
+<span class="font-headline font-black italic text-primary text-2xl tracking-tighter uppercase">RUNSPHERE</span>
+<div class="mt-4">
+<h1 class="font-headline font-extrabold text-6xl md:text-7xl leading-[0.9] tracking-[-0.04em] text-on-surface">
+                        Welcome<br/>Back
+                    </h1>
+</div>
+</div>
+<!-- Login Form -->
+<form class="space-y-8">
+<!-- Email Input -->
+<div class="relative group">
+<label class="font-label text-[10px] font-bold uppercase tracking-[0.15em] text-on-surface-variant mb-2 block ml-4">Credentials</label>
+<div class="relative">
+<!-- Neon Diffusion -->
+<div class="absolute inset-0 bg-primary/5 blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-500"></div>
+<div class="relative flex items-center bg-surface-container-lowest rounded-lg overflow-hidden transition-all duration-300">
+<span class="material-symbols-outlined ml-5 text-on-surface-variant group-focus-within:text-primary transition-colors">alternate_email</span>
+<input class="w-full bg-transparent border-none py-5 px-4 text-on-surface placeholder:text-outline-variant focus:ring-0 font-body text-lg" placeholder="runner@sphere.io" type="email"/>
+</div>
+<!-- Active Edge Glow -->
+<div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-primary group-focus-within:w-full transition-all duration-500 shadow-[0_0_12px_rgba(153,247,255,0.8)]"></div>
+</div>
+</div>
+<!-- Password Input -->
+<div class="relative group">
+<div class="flex justify-between items-end mb-2 px-4">
+<label class="font-label text-[10px] font-bold uppercase tracking-[0.15em] text-on-surface-variant block">Access Key</label>
+<a class="font-label text-[10px] font-bold uppercase tracking-[0.15em] text-tertiary-container hover:text-tertiary transition-colors" href="#">FORGOT?</a>
+</div>
+<div class="relative">
+<!-- Neon Diffusion -->
+<div class="absolute inset-0 bg-primary/5 blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-500"></div>
+<div class="relative flex items-center bg-surface-container-lowest rounded-lg overflow-hidden transition-all duration-300">
+<span class="material-symbols-outlined ml-5 text-on-surface-variant group-focus-within:text-primary transition-colors">lock_open</span>
+<input class="w-full bg-transparent border-none py-5 px-4 text-on-surface placeholder:text-outline-variant focus:ring-0 font-body text-lg" placeholder="••••••••" type="password"/>
+</div>
+<!-- Active Edge Glow -->
+<div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-primary group-focus-within:w-full transition-all duration-500 shadow-[0_0_12px_rgba(153,247,255,0.8)]"></div>
+</div>
+</div>
+<!-- Action Area -->
+<div class="pt-6">
+<button class="primary-gradient w-full py-5 rounded-xl text-on-primary-container font-headline font-black italic tracking-tight text-xl flex items-center justify-center gap-3 transition-transform active:scale-[0.96] shadow-[0_8px_32px_rgba(153,247,255,0.25)]" type="submit">
+                        ENTER SPHERE
+                        <span class="material-symbols-outlined text-2xl">arrow_forward</span>
+</button>
+<div class="mt-12 flex flex-col items-center gap-6">
+<div class="flex items-center gap-4 w-full">
+<div class="h-[1px] flex-grow bg-surface-container-highest"></div>
+<span class="font-label text-[10px] font-bold uppercase tracking-[0.2em] text-outline-variant">OR INITIALIZE VIA</span>
+<div class="h-[1px] flex-grow bg-surface-container-highest"></div>
+</div>
+<div class="flex gap-4 w-full">
+<button class="flex-1 bg-surface-container-high py-4 rounded-lg flex items-center justify-center gap-3 hover:bg-surface-container-highest transition-colors active:scale-95 group" type="button">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">fingerprint</span>
+<span class="font-label text-[10px] font-bold uppercase tracking-widest text-on-surface">Biometrics</span>
+</button>
+<button class="flex-1 bg-surface-container-high py-4 rounded-lg flex items-center justify-center gap-3 hover:bg-surface-container-highest transition-colors active:scale-95 group" type="button">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">key</span>
+<span class="font-label text-[10px] font-bold uppercase tracking-widest text-on-surface">Passkey</span>
+</button>
+</div>
+</div>
+</div>
+</form>
+</div>
+</main>
+<!-- Visual Footer Accent -->
+<footer class="p-8 relative z-10">
+<div class="flex justify-between items-center max-w-6xl mx-auto opacity-40">
+<div class="flex flex-col">
+<span class="font-label text-[8px] font-bold uppercase tracking-[0.3em] text-outline-variant">SYSTEM STATUS</span>
+<div class="flex items-center gap-2 mt-1">
+<div class="w-1.5 h-1.5 rounded-full bg-secondary shadow-[0_0_8px_#39fe13]"></div>
+<span class="font-label text-[10px] font-bold uppercase text-secondary">ACTIVE_ENGINE</span>
+</div>
+</div>
+<div class="text-right">
+<span class="font-label text-[8px] font-bold uppercase tracking-[0.3em] text-outline-variant">v4.2.0-STABLE</span>
+</div>
+</div>
+</footer>
+<!-- Decorative HUD Element (Right) -->
+<div class="fixed right-8 top-1/2 -translate-y-1/2 hidden xl:flex flex-col gap-12 opacity-20 pointer-events-none">
+<div class="flex flex-col items-end">
+<span class="font-headline text-4xl font-black italic tracking-tighter">0.00</span>
+<span class="font-label text-[10px] font-bold uppercase tracking-widest">KINETIC_POTENTIAL</span>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-headline text-4xl font-black italic tracking-tighter text-tertiary-container">WAIT</span>
+<span class="font-label text-[10px] font-bold uppercase tracking-widest">AUTH_REQUIRED</span>
+</div>
+<div class="h-32 w-[2px] bg-gradient-to-b from-primary/50 to-transparent self-end"></div>
+</div>
+</body></html>

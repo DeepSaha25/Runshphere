@@ -1,0 +1,162 @@
+const mongoose = require('mongoose');
+
+const RunSchema = new mongoose.Schema(
+  {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: [true, 'User ID is required']
+    },
+    distance: {
+      type: Number,
+      required: [true, 'Distance is required'],
+      min: [0, 'Distance cannot be negative']
+    },
+    duration: {
+      type: Number,
+      required: [true, 'Duration (in seconds) is required'],
+      min: [0, 'Duration cannot be negative']
+    },
+    coordinates: [
+      {
+        latitude: {
+          type: Number,
+          required: true
+        },
+        longitude: {
+          type: Number,
+          required: true
+        },
+        altitude: {
+          type: Number,
+          default: null
+        },
+        timestamp: {
+          type: Date,
+          default: Date.now
+        }
+      }
+    ],
+    date: {
+      type: Date,
+      required: [true, 'Run date is required'],
+      default: Date.now
+    },
+    avgSpeed: {
+      type: Number,
+      default: 0
+    },
+    averagePace: {
+      type: Number,
+      default: 0
+    },
+    caloriesBurned: {
+      type: Number,
+      default: 0
+    },
+    elevationGain: {
+      type: Number,
+      default: 0
+    },
+    location: {
+      latitude: {
+        type: Number,
+        default: null
+      },
+      longitude: {
+        type: Number,
+        default: null
+      },
+      city: {
+        type: String,
+        default: null
+      },
+      district: {
+        type: String,
+        default: null
+      },
+      state: {
+        type: String,
+        default: null
+      },
+      country: {
+        type: String,
+        default: null
+      },
+      point: {
+        type: {
+          type: String,
+          enum: ['Point'],
+          default: 'Point'
+        },
+        coordinates: {
+          type: [Number],
+          default: undefined
+        }
+      }
+    }
+  },
+  { timestamps: true }
+);
+
+// Calculate average speed before saving (validation for anti-cheat)
+RunSchema.pre('save', function (next) {
+  if (this.duration && this.duration > 0) {
+    // Calculate average speed in km/h
+    const speedKmh = (this.distance / (this.duration / 3600));
+    this.avgSpeed = Math.round(speedKmh * 100) / 100;
+    this.averagePace = this.distance > 0
+      ? Math.round(((this.duration / 60) / this.distance) * 100) / 100
+      : 0;
+
+    // Anti-cheat: Reject if speed > 25 km/h
+    if (speedKmh > 25) {
+      return next(new Error(`Invalid run: Average speed (${speedKmh.toFixed(2)} km/h) exceeds 25 km/h limit`));
+    }
+  }
+  next();
+});
+
+// Validate coordinates array
+RunSchema.pre('save', function (next) {
+  if (!this.coordinates || this.coordinates.length === 0) {
+    return next(new Error('Coordinates array cannot be empty'));
+  }
+  next();
+});
+
+// Index for faster queries
+RunSchema.index({ userId: 1, date: -1 });
+RunSchema.index({ date: -1 });
+RunSchema.index({ createdAt: -1 });
+RunSchema.index({ 'location.point': '2dsphere' });
+RunSchema.index({ 'location.city': 1, date: -1 });
+RunSchema.index({ 'location.district': 1, date: -1 });
+RunSchema.index({ 'location.state': 1, date: -1 });
+RunSchema.index({ 'location.country': 1, date: -1 });
+
+// Method to validate run data
+RunSchema.statics.validateRunData = function (distance, duration) {
+  const errors = [];
+
+  if (distance < 0.2) {
+    errors.push('Distance must be at least 0.2 km');
+  }
+
+  if (duration <= 0) {
+    errors.push('Duration must be greater than 0');
+  }
+
+  if (duration < 60) {
+    errors.push('Run duration must be at least 60 seconds');
+  }
+
+  const speedKmh = (distance / (duration / 3600));
+  if (speedKmh > 25) {
+    errors.push(`Speed ${speedKmh.toFixed(2)} km/h exceeds maximum 25 km/h`);
+  }
+
+  return errors;
+};
+
+module.exports = mongoose.model('Run', RunSchema);

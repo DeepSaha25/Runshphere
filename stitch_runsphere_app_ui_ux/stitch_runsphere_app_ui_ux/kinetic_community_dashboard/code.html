@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;700;800;900&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"on-surface-variant": "#aaabac", "inverse-surface": "#f9f9fa", "on-secondary-fixed": "#064200", "error-container": "#9f0519", "inverse-on-surface": "#545556", "on-tertiary": "#431300", surface: "#0c0e0f", "surface-tint": "#99f7ff", "secondary-fixed-dim": "#2be800", "on-error-container": "#ffa8a3", "surface-container-high": "#1d2021", "secondary-fixed": "#2ff801", secondary: "#2ff801", "outline-variant": "#464849", "on-secondary-container": "#e7ffd9", "surface-container-highest": "#232628", "secondary-dim": "#2be800", "on-tertiary-fixed-variant": "#682200", primary: "#99f7ff", "primary-fixed": "#00f1fe", "on-background": "#f6f6f7", "on-secondary": "#0b5800", "error-dim": "#d7383b", "surface-container-lowest": "#000000", "on-secondary-fixed-variant": "#0d6200", "surface-dim": "#0c0e0f", tertiary: "#ff793e", "on-tertiary-fixed": "#310c00", "on-primary-fixed": "#004145", "surface-variant": "#232628", "on-primary-container": "#00555a", "primary-fixed-dim": "#00e2ee", background: "#0c0e0f", "tertiary-fixed": "#ff9569", "primary-container": "#00f1fe", "on-error": "#490006", "tertiary-fixed-dim": "#ff7e46", outline: "#747577", "tertiary-container": "#fe5f00", "primary-dim": "#00e2ee", error: "#ff716c", "on-primary": "#005f64", "surface-container-low": "#111415", "on-surface": "#f6f6f7", "secondary-container": "#106e00", "inverse-primary": "#006a70", "on-primary-fixed-variant": "#006065", "surface-bright": "#292d2e", "tertiary-dim": "#ff7436", "surface-container": "#171a1b", "on-tertiary-container": "#290900"}, borderRadius: {DEFAULT: "1rem", lg: "2rem", xl: "3rem", full: "9999px"}, fontFamily: {headline: ["Lexend"], body: ["Inter"], label: ["Inter"], display: "Lexend"}}}};</script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .neon-pulse {
+      box-shadow: 0 0 20px rgba(142, 236, 244, 0.15);
+    }
+    .kinetic-gradient {
+      background: linear-gradient(135deg, #99f7ff 0%, #00f1fe 100%);
+    }
+    .diffuse-glow {
+      box-shadow: 0 0 32px rgba(142, 236, 244, 0.12);
+    }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body selection:bg-primary selection:text-on-primary-container">
+<!-- TOP APP BAR -->
+<header class="bg-[#0c0e0f]/60 backdrop-blur-[24px] fixed top-0 w-full z-50 flex justify-between items-center px-6 py-4">
+<div class="flex items-center gap-4">
+<button class="text-[#99f7ff] hover:opacity-80 transition-opacity active:scale-95 duration-200">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+<h1 class="font-['Lexend'] font-bold italic tracking-tighter text-2xl font-black italic text-[#99f7ff] uppercase tracking-[-0.02em]">RUNSPHERE</h1>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex gap-8">
+<a class="text-[#99f7ff] font-['Lexend'] text-[10px] font-bold uppercase tracking-[0.05em]" href="#">Home</a>
+<a class="text-slate-400 font-['Lexend'] text-[10px] font-bold uppercase tracking-[0.05em]" href="#">Run</a>
+<a class="text-slate-400 font-['Lexend'] text-[10px] font-bold uppercase tracking-[0.05em]" href="#">Ranks</a>
+<a class="text-[#99f7ff] font-['Lexend'] text-[10px] font-bold uppercase tracking-[0.05em]" href="#">Social</a>
+<a class="text-slate-400 font-['Lexend'] text-[10px] font-bold uppercase tracking-[0.05em]" href="#">Me</a>
+</nav>
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary/20">
+<img class="w-full h-full object-cover" data-alt="professional portrait of an athletic runner with neon studio lighting highlights on skin" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBCEqlNZEIRdoJij8roRj8YH579dgw6sglwRuhgV2PXcuAEZXhWVs4p3D4Xozdjrnuv9TKBxGdBpUuTQrBVfsvGD_nbmhNXnDz3Up09k9DoBlW4fFT77rJAXowjwtTlLJh28HpYTW2MHONeQR4NHiKRYbx8HRn0LbvkY_jdq2JfwuHZOiEpXV46iaGyJhU9bgaGwsOvJPExp14sD4645dnenPVAm7iq3NkGohBR_Gky7IhuNm5posEcghQ_9noG-Hucw0jVP4gTQCby"/>
+</div>
+</div>
+</header>
+<main class="pt-24 pb-32 px-6 max-w-7xl mx-auto space-y-12">
+<!-- HERO TITLE -->
+<section class="relative">
+<h2 class="font-headline font-black text-6xl md:text-8xl tracking-tighter leading-[0.85] text-on-surface-variant/10 absolute -top-4 -left-2 z-0 select-none">
+        MOMENTUM
+      </h2>
+<div class="relative z-10 space-y-2">
+<p class="font-label text-xs tracking-[0.2em] font-bold text-primary uppercase">Global Community Hub</p>
+<h1 class="font-headline font-extrabold text-7xl md:text-9xl tracking-tighter leading-none italic uppercase">
+          SPHERE HUB
+        </h1>
+</div>
+</section>
+<!-- GLOBAL MOMENTUM CARD -->
+<section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<div class="lg:col-span-2 bg-surface-container-low rounded-lg p-8 relative overflow-hidden flex flex-col justify-end min-h-[400px]">
+<div class="absolute inset-0 z-0">
+<img class="w-full h-full object-cover opacity-20 mix-blend-overlay" data-alt="abstract motion blur of city lights at night from a runner's perspective with high-velocity aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBkiLQ-KMwf7TNVEEjOwgXht6s3VoCG91ZT2j8mINQ1NfpeHfzpd3o-sD3_VRiPpAZYEwxgjTVOFGis8HgW2qoJ96hegR5Lx5noHPce9qdFwO0EA1qI0ad8UC5LaDvuJxNd8M-ERUUdTOQqm1-J-p_eg1xtx8rK4q_o4p7zhHoDbynyAp0JwwZ8ClbuPe_Y-4RCxUs3wFnrmxr_6ynEwI4BXhMoq83kw5BJOfcsLDaRzrT1Ux3yIyj7pVxu4b0_TodDTdqlyCWOMNSd"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent"></div>
+</div>
+<div class="relative z-10 space-y-4">
+<div class="flex items-center gap-3">
+<span class="w-3 h-3 rounded-full bg-secondary animate-pulse shadow-[0_0_12px_rgba(47,248,1,0.6)]"></span>
+<span class="font-label text-xs tracking-widest text-on-surface-variant font-medium uppercase">Live Global Metric</span>
+</div>
+<div class="space-y-0">
+<h3 class="font-headline text-[5rem] md:text-[8rem] font-black leading-none text-primary italic drop-shadow-[0_0_30px_rgba(153,247,255,0.3)]">
+              1.2M <span class="text-3xl md:text-5xl">KM</span>
+</h3>
+<p class="text-on-surface-variant text-lg font-medium max-w-md">Collective distance covered by the RunSphere community this month.</p>
+</div>
+</div>
+</div>
+<!-- TRENDING CLUBS (Asymmetric HUD Side) -->
+<div class="bg-surface-container-high rounded-lg p-6 space-y-8 flex flex-col justify-between">
+<div>
+<h4 class="font-label text-xs tracking-[0.2em] font-bold text-on-surface-variant uppercase mb-6">Trending Clubs</h4>
+<div class="flex flex-wrap gap-4">
+<div class="relative">
+<div class="w-16 h-16 rounded-full diffuse-glow p-1 bg-surface-container-highest">
+<img class="w-full h-full rounded-full object-cover" data-alt="minimalist athletic club logo with bold geometric shapes on dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA7mKoMn-otofUDndRHlLEUbK8Z90bTMTGI0kPUQzqz6C7NyU3208Py0KEzjijqJ0WUkrBfTYW9JIRD3Ii8cqQfKNQsvfEzrq9ZRZklrPJ-fUWwOkiu57EvxNE5LLTo_yXLkP9a5cKcVjf9Dhm0J8hakSQgsI_9UgFxde4ov_35arXNQaNzLBL8ucy4l7nEVGHjl7tUTUS2C3GBkbT1ZR_9zFSppyJC_XWji7WYY5X_hKcsTIiMpsvVoEC9A-e_VavL8FL7OqpW4b9o"/>
+</div>
+<div class="absolute -bottom-1 -right-1 bg-primary text-on-primary-container text-[10px] font-bold px-2 py-0.5 rounded-full">#1</div>
+</div>
+<div class="w-16 h-16 rounded-full diffuse-glow p-1 bg-surface-container-highest">
+<img class="w-full h-full rounded-full object-cover" data-alt="vibrant abstract urban running club badge with modern typography" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDjxMHZLe7uphI-9M4xGZDYLN6VM-wjRk2WNI0qjKGizd9vKtSXm8yUKyVceHFFjxEJ__ovZZDtr8VtepSgaE191ge8H-o2-ZkfGjZd8y5glzLkAkFQObOM-VBIgekazSS4jaAEvVjWW0IHZjAhD6Qe-cNSUQWU7v4sMOkHhFZQ98Etd3P2W2MmDP3fuo-4uzm4zaV-2IqzOkxnuAcVAo2ft4HFl_BRKznn2Z-9g2CHBXLhhncWKEiDc38AoAbD5zPzNpCdnNe3ftJ_"/>
+</div>
+<div class="w-16 h-16 rounded-full diffuse-glow p-1 bg-surface-container-highest">
+<img class="w-full h-full rounded-full object-cover" data-alt="team photo circle for professional running group in athletic gear" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCbPnxucZPfJAEkGLg7ej29_sg15eBov32R0fHHBfo-ImQyOHbWGEHMHWMjL1WMS84_Cz0drfPkvvhJrZnA9U8FO8Zl0Ckw3iFsJ5sb6dp4xAE8G-Q-CEFUiGIIvljybzR4chosULNQtatjzuVFjojlG52sfEaYoLhXp5iXP9vZSM8YCcYUnHhTMZLMxPWwjosK-6YOvmQ3ZcPJGm86Ed5ze4_PcTpyaZtvNhRGVL7x0Bg04-cchmwjprvvIAIU145dNL9nBN0tyQPs"/>
+</div>
+<div class="w-16 h-16 rounded-full diffuse-glow p-1 bg-surface-container-highest flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="add">add</span>
+</div>
+</div>
+</div>
+<div class="space-y-4">
+<p class="font-label text-[10px] tracking-widest text-on-surface-variant font-bold uppercase">Ready to join?</p>
+<button class="w-full kinetic-gradient text-on-primary-container font-headline font-black py-4 rounded-xl text-sm uppercase tracking-widest transition-transform active:scale-[0.96] shadow-[0_8px_32px_rgba(0,241,254,0.2)]">
+            JOIN CLUB
+          </button>
+</div>
+</div>
+</section>
+<!-- ACTIVE CHALLENGES & GROUP RUNS (Bento) -->
+<section class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<!-- CHALLENGES -->
+<div class="space-y-6">
+<div class="flex justify-between items-end">
+<h3 class="font-headline text-3xl font-bold italic tracking-tighter uppercase">Active Challenges</h3>
+<span class="font-label text-[10px] text-primary tracking-widest uppercase cursor-pointer hover:underline">View All</span>
+</div>
+<div class="space-y-4">
+<!-- Challenge Card 1 -->
+<div class="bg-surface-container-high rounded-lg p-6 flex items-center justify-between group cursor-pointer hover:bg-surface-container-highest transition-colors">
+<div class="flex items-center gap-6">
+<div class="w-16 h-16 bg-surface-container-highest rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-4xl" data-icon="rocket_launch">rocket_launch</span>
+</div>
+<div>
+<h4 class="font-headline text-xl font-bold uppercase tracking-tight">Mach Speed 100</h4>
+<p class="text-on-surface-variant text-sm font-medium">100KM in 7 Days</p>
+</div>
+</div>
+<div class="text-right">
+<div class="inline-block bg-tertiary-container/20 px-3 py-1 rounded-full border border-tertiary/30">
+<p class="font-label text-[10px] font-black text-tertiary uppercase tracking-tighter">02D : 14H : 55M</p>
+</div>
+</div>
+</div>
+<!-- Challenge Card 2 -->
+<div class="bg-surface-container-high rounded-lg p-6 flex items-center justify-between group cursor-pointer hover:bg-surface-container-highest transition-colors">
+<div class="flex items-center gap-6">
+<div class="w-16 h-16 bg-surface-container-highest rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary text-4xl" data-icon="vortex">vertex_cluster</span>
+</div>
+<div>
+<h4 class="font-headline text-xl font-bold uppercase tracking-tight">Elevation Elite</h4>
+<p class="text-on-surface-variant text-sm font-medium">3000m Vertical Gain</p>
+</div>
+</div>
+<div class="text-right">
+<div class="inline-block bg-tertiary-container/20 px-3 py-1 rounded-full border border-tertiary/30">
+<p class="font-label text-[10px] font-black text-tertiary uppercase tracking-tighter">05D : 08H : 12M</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- GROUP RUNS (Soft Wells) -->
+<div class="space-y-6">
+<h3 class="font-headline text-3xl font-bold italic tracking-tighter uppercase">Group Runs</h3>
+<div class="space-y-3 bg-surface-container-low p-4 rounded-lg">
+<!-- Run Item -->
+<div class="bg-surface-container-lowest p-4 rounded-lg flex items-center gap-6 border-b border-primary/5 last:border-0 relative overflow-hidden group">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex flex-col items-center justify-center min-w-[60px]">
+<span class="font-headline text-2xl font-black text-primary italic">24</span>
+<span class="font-label text-[10px] text-on-surface-variant uppercase">OCT</span>
+</div>
+<div class="flex-grow">
+<h4 class="font-headline text-lg font-bold tracking-tight uppercase">Neon Midnight Crew</h4>
+<p class="text-on-surface-variant text-sm">Downtown Sector • 08:30 PM</p>
+</div>
+<div class="flex -space-x-3">
+<img class="w-8 h-8 rounded-full border-2 border-surface-container-lowest object-cover" data-alt="user avatar runner" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAE5c3komGqgosTtR0vQawhAgqhLbPZodmDGCUXIZTHBTjyxbiahf5oFsPaer9X79xn239yYBpZww_J2UF5fp4fmodEqpw58m8r-uV90ljEqASPrVbJ7LCd9D_ZEJFTdPaLNSneVJkh_evK9YiL_vB7WLlTvX0Dg4eSka453ZJX__A9FDDGxgHpr6UPwUwsN8lhuvz8Q_TATw4t0fvpsoykxf4uGnbVq4DsoLAfJZGp5k_6x6M-FuPzlq-dTbD0AKEoiEM79ISYcPOF"/>
+<img class="w-8 h-8 rounded-full border-2 border-surface-container-lowest object-cover" data-alt="user avatar runner" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAucSoT5ZmDVR1rcIMCOJC8Qw_ccpeRCiPEDDK6PsZh86C_hWfc4N3pYWDjSiXs1LZfdsi1gRPu8CiAWnhS123gNs45yo9jH8lvlV8w5-s4oX61K5014Jas_ck7BkqofFxG5XgdXOxGlFveAKUzi14zVyNeQSSfZ_WLKWNampeqEEU_kXNgTFWMT1oV0LOvukcDsJVe4xuxFY-T7aSJR7o95UoCC-IulresVkxaOeBMBObotwYKVplLV7bSsO-dqvwh928z56y6dbmk"/>
+<div class="w-8 h-8 rounded-full bg-surface-container-highest border-2 border-surface-container-lowest flex items-center justify-center text-[10px] font-bold text-primary">+12</div>
+</div>
+</div>
+<!-- Run Item -->
+<div class="bg-surface-container-lowest p-4 rounded-lg flex items-center gap-6 border-b border-primary/5 last:border-0 relative overflow-hidden group">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex flex-col items-center justify-center min-w-[60px]">
+<span class="font-headline text-2xl font-black text-primary italic">26</span>
+<span class="font-label text-[10px] text-on-surface-variant uppercase">OCT</span>
+</div>
+<div class="flex-grow">
+<h4 class="font-headline text-lg font-bold tracking-tight uppercase">Velocity Breakfast</h4>
+<p class="text-on-surface-variant text-sm">Harbor Loop • 06:00 AM</p>
+</div>
+<div class="flex -space-x-3">
+<img class="w-8 h-8 rounded-full border-2 border-surface-container-lowest object-cover" data-alt="user avatar runner" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBEIhgcZ-Z7isdAR1KpWJlObG54a7XGtWuj9tSTrdlCQvvbPkmbUH_AFpLpJyTlrNd2RungHzj8ohysQf8_SRVA-DIb1XBey56yaICz5-cRT82XynJ1SPkjesVpgETROtUYDo_PJIYNL-AjxqrapZ4crHlvp74H451PeeEELaJz5wUbr_inAGAJtTWwNZ0pWpSUlm-jDHyG65nAN8Fs8oA4mZnffe7bC3Cs26RAe2x4w9N22gCSXODZ6t9ErkE7nKVRTTYWfdPJE-Z5"/>
+<div class="w-8 h-8 rounded-full bg-surface-container-highest border-2 border-surface-container-lowest flex items-center justify-center text-[10px] font-bold text-primary">+45</div>
+</div>
+</div>
+<!-- Run Item -->
+<div class="bg-surface-container-lowest p-4 rounded-lg flex items-center gap-6 border-b border-primary/5 last:border-0 relative overflow-hidden group">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex flex-col items-center justify-center min-w-[60px]">
+<span class="font-headline text-2xl font-black text-primary italic">28</span>
+<span class="font-label text-[10px] text-on-surface-variant uppercase">OCT</span>
+</div>
+<div class="flex-grow">
+<h4 class="font-headline text-lg font-bold tracking-tight uppercase">Base Phase Social</h4>
+<p class="text-on-surface-variant text-sm">Central Park • 10:00 AM</p>
+</div>
+<div class="flex -space-x-3">
+<img class="w-8 h-8 rounded-full border-2 border-surface-container-lowest object-cover" data-alt="user avatar runner" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDJ-Xz2sut54ecxw_UQoK7lxU5JL3gvO15arBC3R80TMij6kB_UYgFYN4UKZIpYI5raHX13oKtE3Yuk2ClZ7tODk8zqi0JOeM1beBeNQWaLQfhlNxgEjTF-pCaO7r7rdTCOltBYT36mLnEQA8A1LjOI9DHoFia-ZSooPB3V2nbyHWV9kfS3XfP6JHInFc4Hh0lyTU4lrxlpBOcwqrpYKzGO2DxLxXIgXN8OhPIYp-guFTX-PN9hrT2vmfKhrrkkbcrbGQw3US_xsS1D"/>
+<img class="w-8 h-8 rounded-full border-2 border-surface-container-lowest object-cover" data-alt="user avatar runner" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDg9SuA0YCI_FoEa9uEDngDs5jNCfxyL1jj65vKywhjbA8R4ezOlDYtk-sIEV3lyml0d8ZbLhMc19IRWzduS51A_yzUTPM8I9PyiQ9SFSika6H0J5Twto6gOrcMe25MVtmQy09sSmTeHrgydC2VilwcWQG9EhrdCuyygYG8-mY_A0O--Vgi7Qh5rhnTcxrPHA-260y7qsh7sRRKmy7wnG8gIKsiR0Cr7gpc6BEp_WV_hxUOOQiNzeAa1tTebdm0El7Emi302RnFDXU6"/>
+<div class="w-8 h-8 rounded-full bg-surface-container-highest border-2 border-surface-container-lowest flex items-center justify-center text-[10px] font-bold text-primary">+8</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- LIVE COMMUNITY FEED (Grid Asymmetry) -->
+<section class="space-y-6">
+<h3 class="font-headline text-3xl font-bold italic tracking-tighter uppercase">Live Feed</h3>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+<div class="md:col-span-2 bg-surface-container-high rounded-lg overflow-hidden relative group">
+<img class="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-700" data-alt="close-up of elite running shoes on wet asphalt at night with glowing blue accent lights" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB8NJPTrHbNJ5bZgFgknjbe0yO5yRfPlOSmtmD5zj_r6Q7Ww-K9GjKHP1PiyYH6oPzQF91gxwqy4GwMh3Qdbk2mUl09MrE7U9HhdYM9M5v1s5d1x4jUra_jvTo49s6sCow-YDhsrf7spxy5VF-JyhcYwVIKOvv2njVz7gHjjzgCvhlsjiDGNSo_TSrU28glUkNO5mA7NDO1z_upNmK7lgpmNVBF2iy5YYbivO2b3QV10ffNWu35kTXphvYu0VMxEzjJIi1CEmKHt-Mp"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background p-6 flex flex-col justify-end">
+<p class="font-label text-[10px] text-secondary font-black uppercase mb-1">New Personal Best</p>
+<h4 class="font-headline text-2xl font-bold italic">KINETIC OVERLOAD</h4>
+<p class="text-on-surface-variant text-sm">Marcus reached Level 45 Endurance Peak.</p>
+</div>
+</div>
+<div class="md:col-span-1 bg-surface-container-high rounded-lg p-6 flex flex-col justify-center gap-4">
+<span class="material-symbols-outlined text-primary text-5xl" data-icon="trophy">trophy</span>
+<h4 class="font-headline text-xl font-bold uppercase">Sector Leader</h4>
+<p class="text-on-surface-variant text-sm">Sarah J. just took the crown in 'Sunset Sprint' Sector.</p>
+</div>
+<div class="md:col-span-1 bg-surface-container-high rounded-lg p-6 flex flex-col justify-center gap-4">
+<span class="material-symbols-outlined text-tertiary text-5xl" data-icon="local_fire_department">local_fire_department</span>
+<h4 class="font-headline text-xl font-bold uppercase">Hot Streak</h4>
+<p class="text-on-surface-variant text-sm">The 'Tokyo Trailblazers' have maintained high-cadence for 14 days.</p>
+</div>
+</div>
+</section>
+</main>
+<!-- BOTTOM NAVIGATION BAR -->
+<nav class="bg-[#0c0e0f]/60 backdrop-blur-[24px] fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-2 rounded-t-[2rem] shadow-[0_-8px_32px_rgba(153,247,255,0.12)] md:hidden">
+<a class="flex flex-col items-center justify-center text-slate-500 hover:text-[#99f7ff] transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-['Lexend'] text-[10px] font-bold uppercase tracking-[0.05em]">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 hover:text-[#99f7ff] transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="speed">speed</span>
+<span class="font-['Lexend'] text-[10px] font-bold uppercase tracking-[0.05em]">Run</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 hover:text-[#99f7ff] transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="leaderboard">leaderboard</span>
+<span class="font-['Lexend'] text-[10px] font-bold uppercase tracking-[0.05em]">Ranks</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#99f7ff] drop-shadow-[0_0_8px_rgba(153,247,255,0.8)] active:scale-90 duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="groups">groups</span>
+<span class="font-['Lexend'] text-[10px] font-bold uppercase tracking-[0.05em]">Social</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 hover:text-[#99f7ff] transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-['Lexend'] text-[10px] font-bold uppercase tracking-[0.05em]">Me</span>
+</a>
+</nav>
+<!-- FLOATING ACTION BUTTON (Contextual) -->
+<button class="fixed bottom-28 right-6 w-16 h-16 rounded-full kinetic-gradient flex items-center justify-center text-on-primary-container shadow-[0_0_32px_rgba(153,247,255,0.4)] z-40 active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-3xl font-bold" data-icon="add">add</span>
+</button>
+</body></html>
