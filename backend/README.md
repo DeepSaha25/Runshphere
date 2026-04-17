@@ -119,8 +119,9 @@ copy .env.example .env
 Edit `.env` file:
 
 ```env
-# Database - REQUIRED: Update with your MongoDB Atlas connection string
-DATABASE_URL=mongodb+srv://your_user:your_password@your_cluster.mongodb.net/runshphere?retryWrites=true&w=majority
+# Database - REQUIRED: Paste the full MongoDB Atlas URI copied from Atlas
+# Example format intentionally omitted to avoid committing credential-shaped strings
+DATABASE_URL=PASTE_YOUR_MONGODB_ATLAS_URI_HERE
 
 # JWT - Change these in production
 JWT_SECRET=change_this_to_a_strong_secret_key_in_production

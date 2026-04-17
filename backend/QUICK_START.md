@@ -29,15 +29,15 @@ All 10 implementation phases are complete! Here's what has been built:
 3. Click "Create" → Create a new project → Create a cluster (free tier)
 4. Wait for cluster to initialize (~3-5 minutes)
 5. Click "Connect" → "Drivers" → Copy connection string
-6. It will look like: `mongodb+srv://username:password@cluster.mongodb.net/runshphere?retryWrites=true&w=majority`
+6. Copy the full URI from Atlas and keep it private.
 
 ### Step 2: Update `.env` File
 
 Edit `c:\Users\Deep Saha\Desktop\Runshphere\backend\.env`:
 
 ```env
-# Paste your MongoDB connection string here (update username & password)
-DATABASE_URL=mongodb+srv://your_user:your_password@your_cluster.mongodb.net/runshphere?retryWrites=true&w=majority
+# Paste your MongoDB connection string here (copied directly from Atlas)
+DATABASE_URL=PASTE_YOUR_MONGODB_ATLAS_URI_HERE
 
 # Keep JWT settings (or change in production)
 JWT_SECRET=change_this_to_a_strong_secret
