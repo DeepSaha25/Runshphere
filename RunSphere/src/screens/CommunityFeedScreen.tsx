@@ -8,6 +8,7 @@ import {
   StatusBar,
   RefreshControl,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import {Colors} from '../theme/colors';
 import AppHeader from '../components/AppHeader';
@@ -42,7 +43,7 @@ const CommunityFeedScreen = () => {
   const handleLike = async (postId: string) => {
     try {
       await CommunityService.toggleLike(postId);
-      loadFeed(); // Refresh
+      loadFeed();
     } catch {}
   };
 
@@ -51,14 +52,46 @@ const CommunityFeedScreen = () => {
     const now = new Date();
     const diffMs = now.getTime() - d.getTime();
     const diffHrs = Math.floor(diffMs / 3600000);
-    if (diffHrs < 1) return 'Just now';
-    if (diffHrs < 24) return `${diffHrs}h ago`;
-    return `${Math.floor(diffHrs / 24)}d ago`;
+    if (diffHrs < 1) {
+      return 'JUST NOW';
+    }
+    if (diffHrs < 24) {
+      return `${diffHrs}H AGO`;
+    }
+    return `${Math.floor(diffHrs / 24)}D AGO`;
   };
+
+  const feedItems =
+    posts.length > 0
+      ? posts
+      : [
+          {
+            _id: 'demo-feed-1',
+            userId: {name: 'Marcus V.'},
+            text: 'Pushed the limits today. The new kinetic pace tracker kept me in the zone through the final 2km climb.',
+            createdAt: new Date().toISOString(),
+            likesCount: 128,
+            commentsCount: 24,
+            runId: {distance: 12.4, avgSpeed: 14.3},
+            image:
+              'https://lh3.googleusercontent.com/aida-public/AB6AXuAne9FKW939tNGLQIod-ppt6YfhXA64N3e4-ywP120nmGABnmeaU6BZO4uJMgnVms_Ogwpb0ItZ_pwOuyZ3z0WJWFnBAbt-w4ri8vnEn1K4lhw86jaJ24N-kCHL3zyCee7S_A6fpWygxHfOAoQYdOj-wyKjRJ7MJZhPrPWdEkK7eGClw3suyKlVZZhK4XnNGtQrqpjf93_ZUNz6Hf0u81jkA6Nka6qAXoE3QaJrGsHni4YQhZ93tu7P9be7xPqtNdxYhs6YG1y0b08M',
+          },
+          {
+            _id: 'demo-feed-2',
+            userId: {name: 'Elena Rodriguez'},
+            text: 'New personal record locked. Official split felt unreal under city lights.',
+            createdAt: new Date(Date.now() - 7200000).toISOString(),
+            likesCount: 92,
+            commentsCount: 18,
+            runId: {distance: 5.0, avgSpeed: 14.2},
+            image:
+              'https://lh3.googleusercontent.com/aida-public/AB6AXuA_LKa2DyuoNiCfoO2E_AEmY89BnUJsCqzU964IYhNTkfw4zOfNy-hzU2gBQ4eU-IZi1URRc5pm3k5HOgYj6MYixnrnqWbF6_hoTNuMs76gWikiTbTZSgLNQj5hW9E0o6_YgXW4ZEew7eL4dURMDPSxXNthycGifRcC8dNTLcBYCdSdQv5k1oZf7F1-NH0VKAVdwtYKi2vnjHcJVAifPiguA_opK9CjnGygJJKOxWRk8FdIVDGZo8J_Q_Rf5q1IHaWuzc0rG6VI7rOA',
+          },
+        ];
 
   if (loading) {
     return (
-      <View style={[styles.container, {justifyContent: 'center', alignItems: 'center'}]}>
+      <View style={styles.loadingState}>
         <ActivityIndicator size="large" color={Colors.primaryContainer} />
       </View>
     );
@@ -66,83 +99,117 @@ const CommunityFeedScreen = () => {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={Colors.surfaceDim} />
+      <StatusBar barStyle="light-content" backgroundColor={Colors.surface} />
       <AppHeader />
 
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.primaryContainer} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={Colors.primaryContainer}
+          />
         }>
+        <Text style={styles.kicker}>GLOBAL NETWORK</Text>
         <Text style={styles.title}>COMMUNITY</Text>
-        <Text style={styles.subtitle}>Your Pulse on the World</Text>
 
-        {posts.length === 0 ? (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyIcon}>👥</Text>
-            <Text style={styles.emptyTitle}>No posts yet</Text>
-            <Text style={styles.emptyText}>Be the first to share your run with the community!</Text>
-          </View>
-        ) : (
-          posts.map(post => (
-            <View key={post._id} style={styles.feedCard}>
-              <View style={styles.userRow}>
-                <View style={styles.userInfo}>
-                  <View style={styles.userAvatar}>
-                    <Text style={styles.userInitial}>
-                      {post.userId?.name?.[0] || '?'}
-                    </Text>
-                  </View>
-                  <View>
-                    <Text style={styles.userName}>
-                      {post.userId?.name || 'Unknown Runner'}
-                    </Text>
-                    <Text style={styles.userMeta}>{formatDate(post.createdAt)}</Text>
-                  </View>
-                </View>
+        <View style={styles.filterRow}>
+          <TouchableOpacity style={styles.filterActive}>
+            <Text style={styles.filterActiveText}>ALL ACTIVITY</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.filterInactive}>
+            <Text style={styles.filterInactiveText}>FOLLOWING</Text>
+          </TouchableOpacity>
+        </View>
+
+        {feedItems.map((post, index) => (
+            <View key={post._id || index} style={styles.feedCard}>
+              <View style={styles.visualPanel}>
+                <Image
+                  source={{
+                    uri:
+                      post.image ||
+                      'https://lh3.googleusercontent.com/aida-public/AB6AXuAne9FKW939tNGLQIod-ppt6YfhXA64N3e4-ywP120nmGABnmeaU6BZO4uJMgnVms_Ogwpb0ItZ_pwOuyZ3z0WJWFnBAbt-w4ri8vnEn1K4lhw86jaJ24N-kCHL3zyCee7S_A6fpWygxHfOAoQYdOj-wyKjRJ7MJZhPrPWdEkK7eGClw3suyKlVZZhK4XnNGtQrqpjf93_ZUNz6Hf0u81jkA6Nka6qAXoE3QaJrGsHni4YQhZ93tu7P9be7xPqtNdxYhs6YG1y0b08M',
+                  }}
+                  style={styles.feedImage}
+                />
+                <View style={styles.imageOverlay} />
+                <View style={styles.routeLine} />
+                <View style={styles.routeDot} />
+                <Text style={styles.visualBadge}>ACTIVE NOW</Text>
               </View>
 
-              <Text style={styles.postText}>{post.text}</Text>
-
-              {/* Run data if attached */}
-              {post.runId && (
-                <View style={styles.trailMetrics}>
-                  <View style={styles.trailMetricItem}>
-                    <Text style={styles.trailMetricLabel}>DIST</Text>
-                    <Text style={[styles.trailMetricValue, {color: Colors.primary}]}>
-                      {post.runId.distance?.toFixed(1)}
-                      <Text style={styles.trailMetricUnit}>KM</Text>
-                    </Text>
+              <View style={styles.cardBody}>
+                <View style={styles.userRow}>
+                  <View style={styles.userInfo}>
+                    <View style={styles.userAvatar}>
+                      <Text style={styles.userInitial}>
+                        {(post.userId?.name?.[0] || '?').toUpperCase()}
+                      </Text>
+                    </View>
+                    <View>
+                      <Text style={styles.userName}>{post.userId?.name || 'Unknown Runner'}</Text>
+                      <Text style={styles.userMeta}>{formatDate(post.createdAt)}</Text>
+                    </View>
                   </View>
-                  <View style={styles.trailMetricItem}>
-                    <Text style={styles.trailMetricLabel}>PACE</Text>
-                    <Text style={[styles.trailMetricValue, {color: Colors.secondary}]}>
-                      {post.runId.avgSpeed ? (60 / post.runId.avgSpeed).toFixed(1) : '--'}
-                      <Text style={styles.trailMetricUnit}>MIN/KM</Text>
-                    </Text>
-                  </View>
+                  <TouchableOpacity style={styles.followButton}>
+                    <Text style={styles.followText}>FOLLOW</Text>
+                  </TouchableOpacity>
                 </View>
-              )}
 
-              {/* Engagement */}
-              <View style={styles.engagementRow}>
-                <TouchableOpacity
-                  style={styles.engageBtn}
-                  onPress={() => handleLike(post._id)}>
-                  <Text style={{fontSize: 18}}>❤️</Text>
-                  <Text style={styles.engageCount}>{post.likesCount || 0}</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.engageBtn}>
-                  <Text style={{fontSize: 18}}>💬</Text>
-                  <Text style={styles.engageCount}>{post.commentsCount || 0}</Text>
-                </TouchableOpacity>
+                <Text style={styles.postText}>{post.text}</Text>
+
+                {post.runId ? (
+                  <View style={styles.chipsRow}>
+                    <View style={styles.dataChip}>
+                      <Text style={styles.dataChipLabel}>DIST</Text>
+                      <Text style={styles.dataChipValue}>{post.runId.distance?.toFixed(1)} KM</Text>
+                    </View>
+                    <View style={styles.dataChip}>
+                      <Text style={styles.dataChipLabel}>PACE</Text>
+                      <Text style={styles.dataChipValue}>
+                        {post.runId.avgSpeed ? (60 / post.runId.avgSpeed).toFixed(1) : '--'} /KM
+                      </Text>
+                    </View>
+                  </View>
+                ) : null}
+
+                <View style={styles.engagementRow}>
+                  <TouchableOpacity style={styles.engageBtn} onPress={() => handleLike(post._id)}>
+                    <Text style={styles.engageLabel}>LIKE</Text>
+                    <Text style={styles.engageCount}>{post.likesCount || 0}</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.engageBtn}>
+                    <Text style={styles.engageLabel}>COMMENTS</Text>
+                    <Text style={styles.engageCount}>{post.commentsCount || 0}</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.cheerButton}>
+                    <Text style={styles.cheerText}>CHEER</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
-          ))
-        )}
+          ))}
 
-        <View style={{height: 100}} />
+        <View style={styles.sidebarCard}>
+          <Text style={styles.sidebarTitle}>TRENDING CHALLENGES</Text>
+          <View style={styles.challengeItem}>
+            <Text style={styles.challengeName}>Midnight Marathon Relay</Text>
+            <View style={styles.challengeTrack}>
+              <View style={[styles.challengeFill, {width: '65%'}]} />
+            </View>
+          </View>
+          <View style={styles.challengeItem}>
+            <Text style={styles.challengeName}>Vertical Climb Protocol</Text>
+            <View style={styles.challengeTrack}>
+              <View style={[styles.challengeFillOrange, {width: '32%'}]} />
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.footerSpace} />
       </ScrollView>
     </View>
   );
@@ -150,29 +217,297 @@ const CommunityFeedScreen = () => {
 
 const styles = StyleSheet.create({
   container: {flex: 1, backgroundColor: Colors.surface},
-  content: {paddingHorizontal: 16},
-  title: {fontFamily: 'Lexend-Bold', fontSize: 32, fontWeight: '900', color: Colors.primary, letterSpacing: -1, marginBottom: 4},
-  subtitle: {fontFamily: 'Inter-Regular', fontSize: 14, color: Colors.onSurfaceVariant, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 24},
-  emptyState: {alignItems: 'center', paddingVertical: 60},
-  emptyIcon: {fontSize: 48, marginBottom: 16},
-  emptyTitle: {fontFamily: 'Lexend-Bold', fontSize: 20, fontWeight: '700', color: Colors.onSurface, marginBottom: 8},
-  emptyText: {fontFamily: 'Inter-Regular', fontSize: 14, color: Colors.onSurfaceVariant, textAlign: 'center', lineHeight: 22, paddingHorizontal: 32},
-  feedCard: {backgroundColor: Colors.surfaceContainerLow, borderRadius: 16, padding: 20, marginBottom: 20, borderWidth: 1, borderColor: Colors.outlineVariant + '1A', gap: 16},
-  userRow: {flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'},
-  userInfo: {flexDirection: 'row', alignItems: 'center', gap: 12},
-  userAvatar: {width: 48, height: 48, borderRadius: 24, borderWidth: 2, borderColor: Colors.primaryContainer, backgroundColor: Colors.surfaceContainerHigh, alignItems: 'center', justifyContent: 'center'},
-  userInitial: {fontFamily: 'Lexend-Bold', fontSize: 18, fontWeight: '700', color: Colors.onSurface},
-  userName: {fontFamily: 'Lexend-Bold', fontSize: 16, fontWeight: '700', color: Colors.onSurface},
-  userMeta: {fontFamily: 'Inter-Regular', fontSize: 12, color: Colors.onSurfaceVariant},
-  postText: {fontFamily: 'Inter-Regular', fontSize: 14, color: Colors.onSurface, lineHeight: 22},
-  trailMetrics: {flexDirection: 'row', gap: 8},
-  trailMetricItem: {flex: 1, backgroundColor: Colors.surfaceContainerHigh, borderRadius: 12, padding: 14, alignItems: 'center'},
-  trailMetricLabel: {fontFamily: 'Inter-Bold', fontSize: 9, fontWeight: '700', color: Colors.onSurfaceVariant, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 6},
-  trailMetricValue: {fontFamily: 'Lexend-Bold', fontSize: 20, fontWeight: '900'},
-  trailMetricUnit: {fontSize: 10, marginLeft: 2},
-  engagementRow: {flexDirection: 'row', alignItems: 'center', gap: 24, paddingTop: 8, borderTopWidth: 1, borderTopColor: Colors.outlineVariant + '1A'},
-  engageBtn: {flexDirection: 'row', alignItems: 'center', gap: 6},
-  engageCount: {fontFamily: 'Inter-Bold', fontSize: 12, fontWeight: '700', color: Colors.onSurfaceVariant},
+  loadingState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: Colors.surface,
+  },
+  content: {paddingHorizontal: 24, paddingTop: 24, paddingBottom: 24},
+  kicker: {
+    color: Colors.primary + '99',
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 2.2,
+    textTransform: 'uppercase',
+  },
+  title: {
+    marginTop: 6,
+    marginBottom: 18,
+    color: Colors.onSurface,
+    fontFamily: 'Lexend-Bold',
+    fontSize: 42,
+    fontWeight: '900',
+    fontStyle: 'italic',
+  },
+  filterRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 22,
+  },
+  filterActive: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 999,
+    backgroundColor: Colors.surfaceContainerHigh,
+    alignItems: 'center',
+  },
+  filterInactive: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 999,
+    backgroundColor: Colors.surfaceContainerLow,
+    alignItems: 'center',
+  },
+  filterActiveText: {
+    color: Colors.onSurface,
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 1.4,
+    textTransform: 'uppercase',
+  },
+  filterInactiveText: {
+    color: Colors.onSurfaceVariant,
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 1.4,
+    textTransform: 'uppercase',
+  },
+  emptyState: {
+    alignItems: 'center',
+    paddingVertical: 60,
+    backgroundColor: Colors.surfaceContainerLow,
+    borderRadius: 24,
+  },
+  emptyTitle: {
+    color: Colors.onSurface,
+    fontSize: 20,
+    fontWeight: '800',
+  },
+  emptyText: {
+    marginTop: 8,
+    color: Colors.onSurfaceVariant,
+    fontSize: 14,
+    lineHeight: 22,
+    textAlign: 'center',
+    paddingHorizontal: 28,
+  },
+  feedCard: {
+    backgroundColor: Colors.surfaceContainerHigh,
+    borderRadius: 32,
+    overflow: 'hidden',
+    marginBottom: 18,
+  },
+  visualPanel: {
+    height: 180,
+    backgroundColor: Colors.surfaceContainerLow,
+    overflow: 'hidden',
+  },
+  feedImage: {
+    ...StyleSheet.absoluteFill,
+    width: '100%',
+    height: '100%',
+  },
+  imageOverlay: {
+    ...StyleSheet.absoluteFill,
+    backgroundColor: Colors.surfaceContainerHigh + '55',
+  },
+  routeLine: {
+    position: 'absolute',
+    left: 28,
+    right: 34,
+    top: 92,
+    height: 4,
+    borderRadius: 999,
+    backgroundColor: Colors.primary,
+    transform: [{rotate: '-10deg'}],
+  },
+  routeDot: {
+    position: 'absolute',
+    right: 32,
+    top: 72,
+    width: 14,
+    height: 14,
+    borderRadius: 999,
+    backgroundColor: Colors.secondary,
+  },
+  visualBadge: {
+    position: 'absolute',
+    left: 16,
+    bottom: 14,
+    color: Colors.onSurface,
+    backgroundColor: Colors.surface + 'CC',
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    overflow: 'hidden',
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 1.6,
+    textTransform: 'uppercase',
+  },
+  cardBody: {
+    padding: 18,
+  },
+  userRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  userInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    flex: 1,
+  },
+  userAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 999,
+    backgroundColor: Colors.secondary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  userInitial: {
+    color: Colors.onSecondaryFixed,
+    fontSize: 18,
+    fontWeight: '900',
+  },
+  userName: {
+    color: Colors.onSurface,
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  userMeta: {
+    marginTop: 4,
+    color: Colors.onSurfaceVariant,
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  followButton: {
+    borderWidth: 1,
+    borderColor: Colors.outlineVariant + '55',
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  followText: {
+    color: Colors.primary,
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 1.6,
+    textTransform: 'uppercase',
+  },
+  postText: {
+    color: Colors.onSurface,
+    fontSize: 14,
+    lineHeight: 22,
+  },
+  chipsRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 16,
+  },
+  dataChip: {
+    flex: 1,
+    backgroundColor: Colors.tertiaryContainer + '20',
+    borderRadius: 18,
+    padding: 14,
+  },
+  dataChipLabel: {
+    color: Colors.tertiary,
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 1.4,
+    textTransform: 'uppercase',
+  },
+  dataChipValue: {
+    marginTop: 8,
+    color: Colors.tertiary,
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  engagementRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 18,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: Colors.outlineVariant + '22',
+  },
+  engageBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  engageLabel: {
+    color: Colors.onSurfaceVariant,
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 1.6,
+    textTransform: 'uppercase',
+  },
+  engageCount: {
+    color: Colors.onSurface,
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  cheerButton: {
+    backgroundColor: Colors.primary,
+    borderRadius: 999,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  cheerText: {
+    color: Colors.onPrimaryFixed,
+    fontSize: 10,
+    fontWeight: '900',
+    letterSpacing: 1.6,
+    textTransform: 'uppercase',
+  },
+  sidebarCard: {
+    backgroundColor: Colors.surfaceContainerLow,
+    borderRadius: 24,
+    padding: 20,
+  },
+  sidebarTitle: {
+    color: Colors.onSurface,
+    fontFamily: 'Lexend-Bold',
+    fontSize: 20,
+    fontWeight: '800',
+    fontStyle: 'italic',
+    marginBottom: 16,
+  },
+  challengeItem: {
+    marginBottom: 18,
+  },
+  challengeName: {
+    color: Colors.onSurface,
+    fontSize: 13,
+    fontWeight: '700',
+    marginBottom: 10,
+  },
+  challengeTrack: {
+    height: 8,
+    borderRadius: 999,
+    backgroundColor: Colors.surfaceContainerHighest,
+    overflow: 'hidden',
+  },
+  challengeFill: {
+    height: '100%',
+    borderRadius: 999,
+    backgroundColor: Colors.primary,
+  },
+  challengeFillOrange: {
+    height: '100%',
+    borderRadius: 999,
+    backgroundColor: Colors.tertiary,
+  },
+  footerSpace: {
+    height: 120,
+  },
 });
 
 export default CommunityFeedScreen;

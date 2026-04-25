@@ -1,6 +1,7 @@
 import React, {useCallback, useMemo, useState} from 'react';
 import {
   ActivityIndicator,
+  Image,
   RefreshControl,
   ScrollView,
   StatusBar,
@@ -14,38 +15,44 @@ import AppHeader from '../components/AppHeader';
 import {LeaderboardLevel, TimePeriod} from '../services/leaderboardService';
 import {useLeaderboardStore} from '../store/leaderboardStore';
 import {Colors} from '../theme/colors';
-import {formatRelativeRunDate} from '../utils/runMetrics';
 
 const scopeTabs: {label: string; value: LeaderboardLevel}[] = [
   {label: 'Local', value: 'local'},
   {label: 'City', value: 'city'},
   {label: 'District', value: 'district'},
-  {label: 'State', value: 'state'},
 ];
 
-const periodTabs: {label: string; value: TimePeriod}[] = [
-  {label: 'Today', value: 'today'},
-  {label: 'Week', value: 'weekly'},
-  {label: 'Month', value: 'monthly'},
+const podiumImages = [
+  'https://lh3.googleusercontent.com/aida-public/AB6AXuBK6lFeZVGQdWbmQVUa3t_p9iCUqItME5VDiJMze8T-D6DyqNzavtkKHW80NTu-08RJxq8V85RYX3HvEdNsWnzhwUfnMktsvKUEoVIk5xTpdcEn_6XG8IRJqIw2qOu1NjY1eRuzJLLScDCGQoG1FDWwovobm0mOQxgFVUzCtamV_GkaPk9WPcb77WGLkIJ4rpJAv-AlHDauivnsGI9Ir9ChE3hiG0W1HCKBcwH4lhiIs7iq3nQuqN3UQQAC4mla3ED7TLyTdIIXPahq',
+  'https://lh3.googleusercontent.com/aida-public/AB6AXuCIiKMTP7hKDof2YMEFR9FK_KLNZ7gz6V1vbcLPuBCoqogZJBs7kBQ1sXic9LbACQQbZ46_qceBEPWx0YjK-rUu9WAw5WOh2mm8a5v22nQ_ckqKEk27005C-Xf4JzZpIWXoAcUtmvw0H8Axn64Uo9PObonwxfdNzqMpntT8qTEfF8oHnQd69YrP2ry_hEj9V0Uq_OcOGEwLTz0C0NDAHLFruSMIAWdGLihsjs7DiRWa7e0L5cuBbeCF95UuuTcTUjZSQI6HRKcwbpOg',
+  'https://lh3.googleusercontent.com/aida-public/AB6AXuCq64-gqunUa5rvuKcdA4aQe477_mesyD9J2MPhJhoG3PALuuqXc6nsG4RxrbpNL6VjOgWceNjvBYJvCeblW1KDQUWypl-cBH3KoaFsWgQHFfJ_joG8kvXAcwvqyFdUgWhzx8H7WMWb1DS4oj3YcjsOMSs62zIQ-eEoH-VGIIID_TCt08Md1MMyK_hVlquxg1umQDDOYBImQmB-dOTFaQ-i-o31JSxuNF2JkA5ptV-JwikY1at2ytWwaGVy2FrDFrWzhJK04DeotK2I',
+];
+
+const fallbackRows = [
+  {rank: 4, name: 'David Sterling', totalDistance: 72.1, totalRuns: 32},
+  {rank: 5, name: 'Alex Rivers', totalDistance: 68.4, totalRuns: 28, you: true},
+  {rank: 6, name: 'Marcus Kane', totalDistance: 65.2, totalRuns: 24},
+  {rank: 7, name: 'Elena Rossi', totalDistance: 61.9, totalRuns: 21},
 ];
 
 const LeaderboardScreen = () => {
   const [scope, setScope] = useState<LeaderboardLevel>('local');
-  const [period, setPeriod] = useState<TimePeriod>('today');
+  const period: TimePeriod = 'weekly';
   const loadLeaderboard = useLeaderboardStore(state => state.loadLeaderboard);
   const entriesState = useLeaderboardStore(state => state.entries);
-  const ranksState = useLeaderboardStore(state => state.ranks);
   const loadingState = useLeaderboardStore(state => state.loading);
   const [refreshing, setRefreshing] = useState(false);
 
   const currentKey = `${scope}:${period}` as const;
-  const entries = entriesState[currentKey] || [];
-  const yourRank = ranksState[currentKey] ?? null;
+  const entries = useMemo(
+    () => entriesState[currentKey] || [],
+    [currentKey, entriesState],
+  );
   const loading = loadingState[currentKey];
 
   const loadCurrent = useCallback(async () => {
     await loadLeaderboard(scope, period, 30);
-  }, [loadLeaderboard, period, scope]);
+  }, [loadLeaderboard, scope]);
 
   useFocusEffect(
     useCallback(() => {
@@ -62,8 +69,16 @@ const LeaderboardScreen = () => {
     }
   };
 
-  const podium = useMemo(() => entries.slice(0, 3), [entries]);
-  const listEntries = useMemo(() => entries.slice(3), [entries]);
+  const rows = useMemo(() => {
+    const mapped = entries.slice(3, 7).map((entry: any, index: number) => ({
+      rank: entry.rank || index + 4,
+      name: entry.name,
+      totalDistance: Number(entry.totalDistance || 0),
+      totalRuns: Number(entry.totalRuns || 0),
+    }));
+
+    return mapped.length ? mapped : fallbackRows;
+  }, [entries]);
 
   if (loading && entries.length === 0) {
     return (
@@ -75,7 +90,7 @@ const LeaderboardScreen = () => {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={Colors.surfaceDim} />
+      <StatusBar barStyle="light-content" backgroundColor={Colors.surface} />
       <AppHeader />
 
       <ScrollView
@@ -87,110 +102,89 @@ const LeaderboardScreen = () => {
             tintColor={Colors.primaryContainer}
           />
         }>
-        <Text style={styles.title}>LEADERBOARDS</Text>
-        <Text style={styles.subtitle}>
-          {yourRank ? `Your current rank is #${yourRank}` : 'Complete a synced outdoor run to earn a ranking.'}
-        </Text>
+        <View style={styles.headingWrap}>
+          <Text style={styles.ghostTitle}>RANKS</Text>
+          <Text style={styles.title}>THE ELITE</Text>
+          <Text style={styles.subtitle}>GLOBAL STANDING / CYCLE 24</Text>
+        </View>
 
-        <View style={styles.periodSwitcher}>
-          {periodTabs.map(tab => (
+        <View style={styles.tabs}>
+          {scopeTabs.map(tab => (
             <TouchableOpacity
               key={tab.value}
-              style={[
-                styles.periodChip,
-                period === tab.value ? styles.periodChipActive : undefined,
-              ]}
-              onPress={() => setPeriod(tab.value)}>
-              <Text
-                style={[
-                  styles.periodChipText,
-                  period === tab.value ? styles.periodChipTextActive : undefined,
-                ]}>
+              style={[styles.tab, scope === tab.value && styles.tabActive]}
+              onPress={() => setScope(tab.value)}>
+              <Text style={[styles.tabText, scope === tab.value && styles.tabTextActive]}>
                 {tab.label}
               </Text>
             </TouchableOpacity>
           ))}
         </View>
 
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.scopeRow}>
-          {scopeTabs.map(tab => (
-            <TouchableOpacity
-              key={tab.value}
-              style={[
-                styles.scopeChip,
-                scope === tab.value ? styles.scopeChipActive : undefined,
-              ]}
-              onPress={() => setScope(tab.value)}>
-              <Text
-                style={[
-                  styles.scopeChipText,
-                  scope === tab.value ? styles.scopeChipTextActive : undefined,
-                ]}>
-                {tab.label}
-              </Text>
-            </TouchableOpacity>
+        <View style={styles.podium}>
+          {[
+            {rank: 2, name: 'M. Chen', distance: 84.2, image: podiumImages[0]},
+            {rank: 1, name: 'Apex Runner', distance: 120.5, image: podiumImages[1]},
+            {rank: 3, name: 'L. Vazquez', distance: 79.8, image: podiumImages[2]},
+          ].map(item => {
+            const isWinner = item.rank === 1;
+            return (
+              <View key={item.rank} style={styles.podiumItem}>
+                <View style={[styles.podiumGlow, isWinner && styles.podiumGlowWinner]} />
+                <View style={[styles.podiumAvatarWrap, isWinner && styles.winnerAvatarWrap]}>
+                  <Image source={{uri: item.image}} style={styles.podiumAvatar} />
+                </View>
+                <View style={[styles.rankBadge, isWinner && styles.rankBadgeWinner]}>
+                  <Text style={styles.rankBadgeText}>{item.rank}</Text>
+                </View>
+                <Text style={[styles.podiumName, isWinner && styles.podiumNameWinner]}>
+                  {item.name}
+                </Text>
+                <Text style={[styles.podiumDistance, isWinner && styles.podiumDistanceWinner]}>
+                  {item.distance.toFixed(1)} <Text style={styles.unitText}>KM</Text>
+                </Text>
+              </View>
+            );
+          })}
+        </View>
+
+        <View style={styles.rows}>
+          {rows.map((entry: any) => (
+            <View key={`${entry.rank}-${entry.name}`} style={[styles.row, entry.you && styles.youRow]}>
+              <View style={styles.rowLeft}>
+                <Text style={[styles.rowRank, entry.you && styles.youText]}>
+                  {String(entry.rank).padStart(2, '0')}
+                </Text>
+                <View style={[styles.rowAvatar, entry.you && styles.youAvatar]}>
+                  <Text style={styles.rowAvatarText}>{(entry.name || 'R').slice(0, 1)}</Text>
+                </View>
+                <View>
+                  <Text style={styles.rowName}>
+                    {entry.name} {entry.you ? <Text style={styles.youBadge}>YOU</Text> : null}
+                  </Text>
+                  <Text style={[styles.rowMeta, entry.you && styles.youText]}>
+                    {entry.you ? 'RISING STAR' : 'PRO LEAGUE'}
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.rowRight}>
+                <Text style={[styles.rowDistance, entry.you && styles.youText]}>
+                  {Number(entry.totalDistance || 0).toFixed(1)} <Text style={styles.unitText}>KM</Text>
+                </Text>
+                <Text style={styles.rowRuns}>{entry.totalRuns || 0} RUNS</Text>
+              </View>
+            </View>
           ))}
-        </ScrollView>
+        </View>
 
-        {entries.length === 0 ? (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyTitle}>No rankings yet</Text>
-            <Text style={styles.emptyText}>
-              Sync your location in Profile and finish a GPS run to populate this board.
-            </Text>
-          </View>
-        ) : (
-          <>
-            <View style={styles.podiumRow}>
-              {podium.map(entry => (
-                <View key={entry.userId} style={styles.podiumCard}>
-                  <Text style={styles.podiumRank}>#{entry.rank}</Text>
-                  <Text style={styles.podiumName} numberOfLines={1}>
-                    {entry.name}
-                  </Text>
-                  <Text style={styles.podiumDistance}>
-                    {Number(entry.totalDistance || 0).toFixed(1)} km
-                  </Text>
-                  <Text style={styles.podiumMeta}>
-                    {entry.totalRuns} runs
-                  </Text>
-                </View>
-              ))}
-            </View>
-
-            <View style={styles.listSection}>
-              {listEntries.map(entry => (
-                <View key={entry.userId} style={styles.listRow}>
-                  <Text style={styles.listRank}>#{entry.rank}</Text>
-                  <View style={styles.listBody}>
-                    <Text style={styles.listName}>{entry.name}</Text>
-                    <Text style={styles.listMeta}>
-                      {entry.totalRuns} runs • {entry.lastRunAt ? formatRelativeRunDate(entry.lastRunAt) : 'No recent run'}
-                    </Text>
-                  </View>
-                  <Text style={styles.listDistance}>
-                    {Number(entry.totalDistance || 0).toFixed(1)} km
-                  </Text>
-                </View>
-              ))}
-            </View>
-          </>
-        )}
-
-        <View style={{height: 120}} />
+        <View style={styles.footerSpace} />
       </ScrollView>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.surface,
-  },
+  container: {flex: 1, backgroundColor: Colors.surface},
   loadingState: {
     flex: 1,
     justifyContent: 'center',
@@ -198,160 +192,241 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surface,
   },
   content: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
+    paddingTop: 24,
     paddingBottom: 24,
   },
+  headingWrap: {
+    minHeight: 110,
+    justifyContent: 'flex-end',
+    marginBottom: 18,
+  },
+  ghostTitle: {
+    position: 'absolute',
+    left: -28,
+    top: 2,
+    color: Colors.onSurface + '12',
+    fontFamily: 'Lexend-Bold',
+    fontSize: 80,
+    fontWeight: '900',
+    fontStyle: 'italic',
+  },
   title: {
+    color: Colors.onSurface,
+    fontFamily: 'Lexend-Bold',
     fontSize: 40,
     fontWeight: '900',
-    color: Colors.onSurface,
-    letterSpacing: -2,
+    fontStyle: 'italic',
+    textTransform: 'uppercase',
   },
   subtitle: {
-    marginTop: 8,
-    marginBottom: 20,
-    color: Colors.onSurfaceVariant,
-    fontSize: 14,
-    lineHeight: 22,
+    marginTop: 4,
+    color: Colors.primary,
+    fontSize: 11,
+    fontWeight: '900',
+    letterSpacing: 2,
+    textTransform: 'uppercase',
   },
-  periodSwitcher: {
+  tabs: {
     flexDirection: 'row',
+    gap: 8,
+    padding: 4,
     backgroundColor: Colors.surfaceContainerLow,
-    borderRadius: 18,
-    padding: 6,
-    marginBottom: 14,
+    borderRadius: 28,
+    marginBottom: 46,
   },
-  periodChip: {
+  tab: {
     flex: 1,
-    paddingVertical: 10,
-    borderRadius: 14,
+    borderRadius: 22,
+    paddingVertical: 12,
     alignItems: 'center',
   },
-  periodChipActive: {
-    backgroundColor: Colors.neonYellow,
-  },
-  periodChipText: {
-    color: Colors.onSurfaceVariant,
-    fontSize: 12,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 1.5,
-  },
-  periodChipTextActive: {
-    color: Colors.brandOnNeon,
-  },
-  scopeRow: {
-    gap: 10,
-    marginBottom: 18,
-  },
-  scopeChip: {
-    paddingHorizontal: 18,
-    paddingVertical: 12,
-    borderRadius: 16,
+  tabActive: {
     backgroundColor: Colors.surfaceContainerHigh,
   },
-  scopeChipActive: {
-    backgroundColor: Colors.primaryContainer,
-  },
-  scopeChipText: {
+  tabText: {
     color: Colors.onSurfaceVariant,
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: '900',
+    letterSpacing: 1.4,
     textTransform: 'uppercase',
-    letterSpacing: 1.5,
   },
-  scopeChipTextActive: {
-    color: Colors.onPrimaryFixed,
+  tabTextActive: {
+    color: Colors.primary,
   },
-  emptyState: {
-    marginTop: 80,
-    padding: 24,
-    borderRadius: 24,
-    backgroundColor: Colors.surfaceContainerLow,
+  podium: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+    marginBottom: 44,
+  },
+  podiumItem: {
+    flex: 1,
     alignItems: 'center',
   },
-  emptyTitle: {
-    color: Colors.onSurface,
-    fontSize: 20,
-    fontWeight: '800',
+  podiumGlow: {
+    position: 'absolute',
+    top: 8,
+    width: 88,
+    height: 88,
+    borderRadius: 999,
+    backgroundColor: Colors.tertiary + '22',
+    shadowColor: Colors.tertiary,
+    shadowOpacity: 0.25,
+    shadowRadius: 22,
   },
-  emptyText: {
-    marginTop: 8,
-    color: Colors.onSurfaceVariant,
-    textAlign: 'center',
-    lineHeight: 22,
+  podiumGlowWinner: {
+    width: 118,
+    height: 118,
+    backgroundColor: Colors.primary + '33',
+    shadowColor: Colors.primary,
   },
-  podiumRow: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 18,
+  podiumAvatarWrap: {
+    width: 82,
+    height: 82,
+    borderRadius: 999,
+    padding: 4,
+    backgroundColor: Colors.tertiaryDim,
   },
-  podiumCard: {
-    flex: 1,
-    padding: 18,
-    borderRadius: 22,
-    backgroundColor: Colors.surfaceContainerLow,
-    borderWidth: 1,
-    borderColor: Colors.outlineVariant + '22',
+  winnerAvatarWrap: {
+    width: 112,
+    height: 112,
+    backgroundColor: Colors.primary,
   },
-  podiumRank: {
-    color: Colors.neonYellow,
-    fontSize: 16,
-    fontWeight: '800',
+  podiumAvatar: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 999,
+  },
+  rankBadge: {
+    marginTop: -20,
+    marginLeft: 62,
+    width: 32,
+    height: 32,
+    borderRadius: 999,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.surfaceContainerHighest,
+  },
+  rankBadgeWinner: {
+    backgroundColor: Colors.primary,
+  },
+  rankBadgeText: {
+    color: Colors.onPrimaryFixed,
+    fontSize: 13,
+    fontWeight: '900',
   },
   podiumName: {
-    marginTop: 8,
-    color: Colors.onSurface,
-    fontSize: 16,
-    fontWeight: '800',
+    marginTop: 10,
+    color: Colors.onSurfaceVariant,
+    fontSize: 11,
+    fontWeight: '900',
+    letterSpacing: 1.4,
+    textTransform: 'uppercase',
+  },
+  podiumNameWinner: {
+    color: Colors.primary,
   },
   podiumDistance: {
-    marginTop: 10,
-    color: Colors.primaryContainer,
-    fontSize: 22,
+    marginTop: 5,
+    color: Colors.onSurface,
+    fontFamily: 'Lexend-Bold',
+    fontSize: 18,
     fontWeight: '900',
+    fontStyle: 'italic',
   },
-  podiumMeta: {
-    marginTop: 6,
-    color: Colors.onSurfaceVariant,
-    fontSize: 12,
+  podiumDistanceWinner: {
+    fontSize: 28,
   },
-  listSection: {
-    gap: 12,
+  unitText: {
+    fontSize: 10,
   },
-  listRow: {
+  rows: {
+    gap: 14,
+  },
+  row: {
+    borderRadius: 32,
+    padding: 18,
+    backgroundColor: Colors.surfaceContainerHigh,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    padding: 16,
-    borderRadius: 18,
-    backgroundColor: Colors.surfaceContainerLow,
-    borderWidth: 1,
-    borderColor: Colors.outlineVariant + '22',
+    justifyContent: 'space-between',
   },
-  listRank: {
-    width: 36,
-    color: Colors.primaryContainer,
-    fontSize: 16,
-    fontWeight: '900',
+  youRow: {
+    backgroundColor: Colors.surfaceContainerHigh,
+    shadowColor: Colors.primary,
+    shadowOffset: {width: 0, height: 0},
+    shadowOpacity: 0.16,
+    shadowRadius: 24,
   },
-  listBody: {
+  rowLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
     flex: 1,
+    gap: 16,
   },
-  listName: {
-    color: Colors.onSurface,
-    fontSize: 15,
-    fontWeight: '700',
-  },
-  listMeta: {
-    marginTop: 4,
+  rowRank: {
+    width: 28,
     color: Colors.onSurfaceVariant,
-    fontSize: 12,
+    fontSize: 18,
+    fontWeight: '900',
+    fontStyle: 'italic',
   },
-  listDistance: {
+  rowAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 999,
+    backgroundColor: Colors.surfaceContainerHighest,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  youAvatar: {
+    backgroundColor: Colors.primary,
+  },
+  rowAvatarText: {
+    color: Colors.onSurface,
+    fontSize: 18,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+  },
+  rowName: {
     color: Colors.onSurface,
     fontSize: 14,
-    fontWeight: '800',
+    fontWeight: '900',
+    textTransform: 'uppercase',
+  },
+  youBadge: {
+    color: Colors.primary,
+    fontSize: 10,
+  },
+  rowMeta: {
+    marginTop: 4,
+    color: Colors.onSurfaceVariant,
+    fontSize: 10,
+    fontWeight: '900',
+    letterSpacing: 1.4,
+  },
+  rowRight: {
+    alignItems: 'flex-end',
+  },
+  rowDistance: {
+    color: Colors.onSurface,
+    fontFamily: 'Lexend-Bold',
+    fontSize: 22,
+    fontWeight: '900',
+    fontStyle: 'italic',
+  },
+  rowRuns: {
+    marginTop: 3,
+    color: Colors.onSurfaceVariant,
+    fontSize: 10,
+    fontWeight: '900',
+  },
+  youText: {
+    color: Colors.primary,
+  },
+  footerSpace: {
+    height: 120,
   },
 });
 

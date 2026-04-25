@@ -1,4 +1,5 @@
 import ApiClient from './apiClient';
+import {GUEST_TOKEN, guestUser} from './guestSession';
 
 export interface LoginPayload {
   email: string;
@@ -32,6 +33,18 @@ const AuthService = {
 
   async logout() {
     await ApiClient.clearAuth();
+  },
+
+  async loginAsGuest(): Promise<AuthResponse> {
+    const response = {
+      status: 'success',
+      message: 'Guest session started',
+      token: GUEST_TOKEN,
+      user: guestUser,
+    };
+
+    await ApiClient.setAuth(response.token, response.user);
+    return response;
   },
 
   async isLoggedIn(): Promise<boolean> {

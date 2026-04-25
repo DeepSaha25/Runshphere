@@ -1,21 +1,20 @@
 import React from 'react';
 import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import LinearGradient from 'react-native-linear-gradient';
 import HomeScreen from '../screens/HomeScreen';
 import LeaderboardScreen from '../screens/LeaderboardScreen';
-import HistoryScreen from '../screens/HistoryScreen';
+import CommunityFeedScreen from '../screens/CommunityFeedScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import {Colors} from '../theme/colors';
 import {MainTabParamList} from './types';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
-const TAB_ICONS: Record<keyof MainTabParamList, {icon: string; label: string}> = {
-  Home: {icon: '⌂', label: 'Home'},
-  Leaderboards: {icon: '⌁', label: 'Ranks'},
-  History: {icon: '↺', label: 'History'},
-  Profile: {icon: '◉', label: 'Profile'},
+const TAB_CONFIG: Record<keyof MainTabParamList, {label: string}> = {
+  Home: {label: 'Home'},
+  Leaderboards: {label: 'Ranks'},
+  Community: {label: 'Social'},
+  Profile: {label: 'Me'},
 };
 
 const BottomTabNavigator = ({navigation}: any) => (
@@ -25,67 +24,40 @@ const BottomTabNavigator = ({navigation}: any) => (
       tabBarStyle: styles.hiddenTabBar,
     }}
     tabBar={({state, navigation: tabNavigation}) => (
-      <View style={styles.tabBarContainer}>
-        <View style={styles.tabBarInner}>
-          <View style={styles.sideGroup}>
-            {state.routes.slice(0, 2).map((route, index) => {
-              const config = TAB_ICONS[route.name as keyof MainTabParamList];
-              const isFocused = state.index === index;
+      <View style={styles.tabBar}>
+        <TouchableOpacity
+          style={[styles.tabItem, state.index === 0 && styles.activeTabItem]}
+          onPress={() => tabNavigation.navigate('Home')}>
+          <Text style={[styles.tabLabel, state.index === 0 && styles.activeText]}>Home</Text>
+        </TouchableOpacity>
 
-              return (
-                <TouchableOpacity
-                  key={route.key}
-                  style={styles.sideTab}
-                  onPress={() => tabNavigation.navigate(route.name as never)}>
-                  <Text style={[styles.sideIcon, isFocused && styles.sideIconActive]}>
-                    {config.icon}
-                  </Text>
-                  <Text style={[styles.sideLabel, isFocused && styles.sideLabelActive]}>
-                    {config.label}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
+        <TouchableOpacity
+          style={styles.runTabItem}
+          onPress={() => navigation.navigate('RunTracking')}>
+          <Text style={styles.runTabLabel}>Run</Text>
+        </TouchableOpacity>
 
-          <TouchableOpacity
-            activeOpacity={0.9}
-            onPress={() => navigation.navigate('RunTracking')}
-            style={styles.runButtonWrapper}>
-            <LinearGradient
-              colors={[Colors.neonYellowLight, Colors.neonYellow]}
-              style={styles.runButton}>
-              <Text style={styles.runButtonIcon}>▶</Text>
-            </LinearGradient>
-          </TouchableOpacity>
+        {state.routes.slice(1).map((route, offset) => {
+          const routeIndex = offset + 1;
+          const config = TAB_CONFIG[route.name as keyof MainTabParamList];
+          const isFocused = state.index === routeIndex;
 
-          <View style={styles.sideGroup}>
-            {state.routes.slice(2).map((route, offset) => {
-              const index = offset + 2;
-              const config = TAB_ICONS[route.name as keyof MainTabParamList];
-              const isFocused = state.index === index;
-
-              return (
-                <TouchableOpacity
-                  key={route.key}
-                  style={styles.sideTab}
-                  onPress={() => tabNavigation.navigate(route.name as never)}>
-                  <Text style={[styles.sideIcon, isFocused && styles.sideIconActive]}>
-                    {config.icon}
-                  </Text>
-                  <Text style={[styles.sideLabel, isFocused && styles.sideLabelActive]}>
-                    {config.label}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        </View>
+          return (
+            <TouchableOpacity
+              key={route.key}
+              style={[styles.tabItem, isFocused && styles.activeTabItem]}
+              onPress={() => tabNavigation.navigate(route.name as never)}>
+              <Text style={[styles.tabLabel, isFocused && styles.activeText]}>
+                {config.label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
     )}>
     <Tab.Screen name="Home" component={HomeScreen} />
     <Tab.Screen name="Leaderboards" component={LeaderboardScreen} />
-    <Tab.Screen name="History" component={HistoryScreen} />
+    <Tab.Screen name="Community" component={CommunityFeedScreen} />
     <Tab.Screen name="Profile" component={ProfileScreen} />
   </Tab.Navigator>
 );
@@ -94,79 +66,66 @@ const styles = StyleSheet.create({
   hiddenTabBar: {
     display: 'none',
   },
-  tabBarContainer: {
+  tabBar: {
     position: 'absolute',
     left: 0,
     right: 0,
     bottom: 0,
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-  },
-  tabBarInner: {
+    minHeight: 84,
+    paddingHorizontal: 12,
+    paddingTop: 10,
+    paddingBottom: 18,
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    borderRadius: 32,
-    backgroundColor: Colors.brandDark + 'F2',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    shadowColor: '#000',
+    justifyContent: 'space-around',
+    backgroundColor: Colors.surface + '99',
+    shadowColor: Colors.primary,
     shadowOffset: {width: 0, height: -8},
-    shadowOpacity: 0.45,
-    shadowRadius: 30,
+    shadowOpacity: 0.16,
+    shadowRadius: 32,
     elevation: 18,
   },
-  sideGroup: {
-    flexDirection: 'row',
+  tabItem: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'space-evenly',
-  },
-  sideTab: {
-    minWidth: 62,
-    height: 52,
+    height: 44,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  sideIcon: {
+  tabLabel: {
     color: Colors.slateInactive,
-    fontSize: 22,
-    opacity: 0.55,
+    fontFamily: 'Lexend-Bold',
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
   },
-  sideIconActive: {
-    color: Colors.onSurface,
-    opacity: 1,
+  activeTabItem: {
+    backgroundColor: Colors.primary + '14',
   },
-  sideLabel: {
-    marginTop: 2,
-    color: Colors.slateInactive,
-    fontSize: 9,
-    fontWeight: '700',
+  runTabItem: {
+    flex: 1,
+    height: 52,
+    borderRadius: 26,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.primary,
+  },
+  runTabLabel: {
+    color: Colors.onPrimaryFixed,
+    fontFamily: 'Lexend-Bold',
+    fontSize: 12,
+    fontWeight: '900',
     letterSpacing: 1,
     textTransform: 'uppercase',
   },
-  sideLabelActive: {
-    color: Colors.onSurface,
-  },
-  runButtonWrapper: {
-    marginHorizontal: 8,
-  },
-  runButton: {
-    width: 68,
-    height: 68,
-    borderRadius: 34,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: Colors.neonYellow,
-    shadowOffset: {width: 0, height: 0},
-    shadowOpacity: 0.3,
-    shadowRadius: 20,
-    elevation: 10,
-  },
-  runButtonIcon: {
-    color: Colors.brandOnNeon,
-    fontSize: 28,
-    marginLeft: 4,
+  activeText: {
+    color: Colors.primary,
+    textShadowColor: 'rgba(153,247,255,0.8)',
+    textShadowOffset: {width: 0, height: 0},
+    textShadowRadius: 8,
   },
 });
 

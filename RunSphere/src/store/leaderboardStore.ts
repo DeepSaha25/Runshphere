@@ -5,6 +5,8 @@ import LeaderboardService, {
   TimePeriod,
 } from '../services/leaderboardService';
 import {ApiError} from '../services/apiClient';
+import {isGuestUser} from '../services/guestSession';
+import {useAuthStore} from './authStore';
 
 type Key = `${LeaderboardLevel}:${TimePeriod}`;
 
@@ -24,6 +26,41 @@ interface LeaderboardState {
 
 const getKey = (scope: LeaderboardLevel, period: TimePeriod) =>
   `${scope}:${period}` as Key;
+
+const guestEntries = [
+  {
+    userId: 'demo-1',
+    name: 'Maya Sen',
+    rank: 1,
+    totalDistance: 18.6,
+    totalRuns: 5,
+    lastRunAt: new Date().toISOString(),
+  },
+  {
+    userId: 'guest-runner',
+    name: 'Guest Runner',
+    rank: 2,
+    totalDistance: 12.4,
+    totalRuns: 4,
+    lastRunAt: new Date(Date.now() - 3600000).toISOString(),
+  },
+  {
+    userId: 'demo-2',
+    name: 'Arjun Rao',
+    rank: 3,
+    totalDistance: 9.8,
+    totalRuns: 3,
+    lastRunAt: new Date(Date.now() - 7200000).toISOString(),
+  },
+  {
+    userId: 'demo-3',
+    name: 'Nia Bose',
+    rank: 4,
+    totalDistance: 7.1,
+    totalRuns: 2,
+    lastRunAt: new Date(Date.now() - 86400000).toISOString(),
+  },
+];
 
 export const useLeaderboardStore = create<LeaderboardState>()(
   devtools(
@@ -46,6 +83,20 @@ export const useLeaderboardStore = create<LeaderboardState>()(
         }));
 
         try {
+          if (isGuestUser(useAuthStore.getState().user)) {
+            set(state => ({
+              entries: {
+                ...state.entries,
+                [key]: guestEntries.slice(0, limit),
+              },
+              ranks: {
+                ...state.ranks,
+                [key]: 2,
+              },
+            }));
+            return;
+          }
+
           const response = await LeaderboardService.getLeaderboard(
             scope,
             period,

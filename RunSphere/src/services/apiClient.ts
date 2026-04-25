@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {GUEST_TOKEN} from './guestSession';
 
 const BASE_URL = 'http://10.0.2.2:5000/api'; // Android emulator → host machine
 
@@ -71,7 +72,7 @@ class ApiClient {
     const rawText = await response.text();
     const data = rawText ? JSON.parse(rawText) : {};
 
-    if (response.status === 401) {
+    if (response.status === 401 && this.token !== GUEST_TOKEN) {
       await this.clearAuth();
     }
 

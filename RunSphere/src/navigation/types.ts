@@ -1,7 +1,7 @@
 export type MainTabParamList = {
   Home: undefined;
   Leaderboards: undefined;
-  History: undefined;
+  Community: undefined;
   Profile: undefined;
 };
 

@@ -12,8 +12,10 @@ import Toast from 'react-native-toast-message';
 import GradientButton from '../components/GradientButton';
 import RouteMap from '../components/RouteMap';
 import RunService from '../services/runService';
+import {isGuestUser} from '../services/guestSession';
 import {useLeaderboardStore} from '../store/leaderboardStore';
 import {useRunStore} from '../store/runStore';
+import {useAuthStore} from '../store/authStore';
 import {useUserStore} from '../store/userStore';
 import {Colors} from '../theme/colors';
 import {
@@ -25,6 +27,7 @@ import {
 
 const RunSummaryScreen = ({navigation}: any) => {
   const [saving, setSaving] = useState(false);
+  const authUser = useAuthStore(state => state.user);
   const profile = useUserStore(state => state.profile);
   const refreshDashboard = useUserStore(state => state.refreshDashboard);
   const loadLeaderboard = useLeaderboardStore(state => state.loadLeaderboard);
@@ -68,14 +71,16 @@ const RunSummaryScreen = ({navigation}: any) => {
 
     setSaving(true);
     try {
-      await RunService.submitRun({
-        distance: Number(summary.distanceKm.toFixed(2)),
-        duration: summary.elapsedSeconds,
-        coordinates,
-        elevationGain: summary.elevationGain,
-        caloriesBurned: summary.caloriesBurned,
-        date: summary.finishedAt,
-      });
+      if (!isGuestUser(authUser)) {
+        await RunService.submitRun({
+          distance: Number(summary.distanceKm.toFixed(2)),
+          duration: summary.elapsedSeconds,
+          coordinates,
+          elevationGain: summary.elevationGain,
+          caloriesBurned: summary.caloriesBurned,
+          date: summary.finishedAt,
+        });
+      }
 
       await Promise.all([
         refreshDashboard(20),
@@ -87,8 +92,10 @@ const RunSummaryScreen = ({navigation}: any) => {
 
       Toast.show({
         type: 'success',
-        text1: 'Run saved',
-        text2: 'Your stats and leaderboards have been updated.',
+        text1: isGuestUser(authUser) ? 'Demo run saved' : 'Run saved',
+        text2: isGuestUser(authUser)
+          ? 'Guest mode keeps this run on your device for this demo.'
+          : 'Your stats and leaderboards have been updated.',
       });
 
       navigation.reset({

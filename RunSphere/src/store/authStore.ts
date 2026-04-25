@@ -16,6 +16,7 @@ interface AuthState {
   hydrated: boolean;
   bootstrap: () => Promise<void>;
   login: (payload: LoginPayload) => Promise<AuthResponse>;
+  loginAsGuest: () => Promise<AuthResponse>;
   signup: (payload: SignupPayload) => Promise<void>;
   logout: () => Promise<void>;
   setUser: (user: AuthUser) => Promise<void>;
@@ -40,6 +41,15 @@ export const useAuthStore = create<AuthState>()(
         },
         login: async payload => {
           const response = await AuthService.login(payload);
+          set({
+            token: response.token,
+            user: response.user,
+            hydrated: true,
+          });
+          return response;
+        },
+        loginAsGuest: async () => {
+          const response = await AuthService.loginAsGuest();
           set({
             token: response.token,
             user: response.user,

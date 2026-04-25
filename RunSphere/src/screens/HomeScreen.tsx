@@ -1,6 +1,7 @@
 import React, {useCallback, useMemo, useState} from 'react';
 import {
   ActivityIndicator,
+  Image,
   RefreshControl,
   ScrollView,
   StatusBar,
@@ -12,7 +13,6 @@ import {
 import {useFocusEffect} from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
 import AppHeader from '../components/AppHeader';
-import ProgressBar from '../components/ProgressBar';
 import {useLeaderboardStore} from '../store/leaderboardStore';
 import {useUserStore} from '../store/userStore';
 import {Colors} from '../theme/colors';
@@ -34,8 +34,8 @@ const HomeScreen = ({navigation}: any) => {
   const loadHome = useCallback(async () => {
     await Promise.allSettled([
       refreshDashboard(6),
-      loadLeaderboard('local', 'today', 3),
-      loadLeaderboard('city', 'weekly', 3),
+      loadLeaderboard('local', 'today', 5),
+      loadLeaderboard('city', 'weekly', 5),
     ]);
   }, [loadLeaderboard, refreshDashboard]);
 
@@ -58,10 +58,8 @@ const HomeScreen = ({navigation}: any) => {
   const localToday = leaderboardEntries['local:today'] || [];
   const cityWeekly = leaderboardEntries['city:weekly'] || [];
   const localRank = leaderboardRanks['local:today'];
-  const weeklyGoalProgress = Math.min(
-    100,
-    ((weeklyStats?.totalDistance || 0) / 25) * 100,
-  );
+  const weeklyDistance = Number(weeklyStats?.totalDistance || 0);
+  const totalDistance = Number(stats?.totalDistance || profile?.totalDistance || 0);
 
   const locationLabel = useMemo(() => {
     const city = profile?.location?.city;
@@ -71,6 +69,8 @@ const HomeScreen = ({navigation}: any) => {
     }
     return city || state || 'Location not synced';
   }, [profile?.location?.city, profile?.location?.state]);
+
+  const activeProgress = Math.max(8, Math.min(100, (weeklyDistance / 6) * 100));
 
   if (isLoading && !profile) {
     return (
@@ -82,7 +82,9 @@ const HomeScreen = ({navigation}: any) => {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={Colors.surfaceDim} />
+      <StatusBar barStyle="light-content" backgroundColor={Colors.surface} />
+      <View style={styles.glowTop} />
+      <View style={styles.glowBottom} />
       <AppHeader showStreak streakCount={profile?.streak || 0} />
 
       <ScrollView
@@ -95,90 +97,93 @@ const HomeScreen = ({navigation}: any) => {
             tintColor={Colors.primaryContainer}
           />
         }>
-        <View style={styles.locationBadge}>
-          <Text style={styles.locationBadgeText}>{locationLabel}</Text>
-        </View>
-
-        <Text style={styles.heroLabel}>TODAY'S DISTANCE</Text>
-        <View style={styles.heroValueRow}>
+        <Text style={styles.kicker}>TODAY'S DISTANCE</Text>
+        <View style={styles.heroRow}>
           <Text style={styles.heroValue}>
-            {Number(dailyStats?.totalDistance || 0).toFixed(2)}
+            {Number(dailyStats?.totalDistance || 0).toFixed(1)}
           </Text>
           <Text style={styles.heroUnit}>KM</Text>
         </View>
 
-        <View style={styles.rankRow}>
-          <View style={styles.rankCard}>
-            <Text style={styles.rankLabel}>LOCAL RANK</Text>
-            <Text style={styles.rankValue}>
-              {localRank ? `#${localRank}` : '--'}
-            </Text>
-          </View>
-          <View style={styles.rankDivider} />
-          <View style={styles.rankCard}>
-            <Text style={styles.rankLabel}>LIFETIME</Text>
-            <Text style={styles.rankGlobal}>
-              {Number(stats?.totalDistance || profile?.totalDistance || 0).toFixed(1)} km
-            </Text>
-          </View>
-        </View>
-
         <TouchableOpacity
-          activeOpacity={0.9}
+          activeOpacity={0.92}
           onPress={() => navigation.navigate('RunTracking')}
-          style={styles.startRunWrapper}>
+          style={styles.startActionWrap}>
           <LinearGradient
-            colors={[Colors.neonYellowLight, Colors.neonYellow]}
-            style={styles.startRunButton}>
-            <View style={styles.playCircle}>
-              <Text style={styles.playIcon}>▶</Text>
-            </View>
-            <Text style={styles.startRunText}>Start Run</Text>
-            <Text style={styles.chevron}>›</Text>
+            colors={[Colors.primary, Colors.primaryContainer]}
+            start={{x: 0, y: 0}}
+            end={{x: 1, y: 1}}
+            style={styles.startAction}>
+            <Text style={styles.startActionText}>START RUN</Text>
+            <Text style={styles.startActionArrow}>NOW</Text>
           </LinearGradient>
         </TouchableOpacity>
 
         <View style={styles.bentoGrid}>
-          <View style={styles.lastRunCard}>
-            <Text style={styles.cardLabel}>LAST RUN</Text>
+          <View style={styles.card}>
+            <Text style={styles.cardLabel}>LAST PERFORMANCE</Text>
+            <Text style={styles.cardTitle}>
+              {lastRun ? `${Number(lastRun.distance || 0).toFixed(2)} KM` : 'NO RUN YET'}
+            </Text>
+            <Text style={styles.cardMeta}>
+              {lastRun ? formatRelativeRunDate(lastRun.date) : 'Start a tracked run to build the dashboard.'}
+            </Text>
             {lastRun ? (
-              <>
-                <Text style={styles.lastRunTitle}>
-                  {Number(lastRun.distance || 0).toFixed(2)} km
-                </Text>
-                <Text style={styles.lastRunMeta}>
-                  {formatRelativeRunDate(lastRun.date)}
-                </Text>
-                <Text style={styles.lastRunMeta}>
-                  {formatClock(lastRun.duration || 0)}
-                </Text>
-                <Text style={styles.lastRunPace}>
-                  {formatPace(lastRun.averagePace || (lastRun.avgSpeed ? 60 / lastRun.avgSpeed : 0))}
-                </Text>
-              </>
-            ) : (
-              <Text style={styles.lastRunMeta}>No runs recorded yet</Text>
-            )}
+              <View style={styles.metricRow}>
+                <View>
+                  <Text style={styles.metricValue}>
+                    {formatPace(
+                      lastRun.averagePace || (lastRun.avgSpeed ? 60 / lastRun.avgSpeed : 0),
+                    )}
+                  </Text>
+                  <Text style={styles.metricCaption}>PACE</Text>
+                </View>
+                <View>
+                  <Text style={styles.metricValue}>{formatClock(lastRun.duration || 0)}</Text>
+                  <Text style={styles.metricCaption}>TIME</Text>
+                </View>
+              </View>
+            ) : null}
           </View>
 
-          <View style={styles.activeTimeCard}>
-            <Text style={[styles.cardLabel, {color: Colors.primaryContainer}]}>
-              WEEKLY
+          <View style={[styles.card, styles.cardLow]}>
+            <Text style={styles.cardLabel}>ACTIVE TIME / WEEK</Text>
+            <Text style={styles.highlightValue}>
+              {weeklyDistance.toFixed(1)} <Text style={styles.highlightUnit}>KM</Text>
             </Text>
-            <View style={styles.activeTimeValueRow}>
-              <Text style={styles.activeTimeValue}>
-                {Number(weeklyStats?.totalDistance || 0).toFixed(1)}
-              </Text>
-              <Text style={styles.activeTimeUnit}>KM</Text>
+            <View style={styles.progressTrack}>
+              <View style={[styles.progressFill, {width: `${activeProgress}%`}]} />
             </View>
-            <ProgressBar
-              progress={weeklyGoalProgress}
-              color={Colors.primaryContainer}
-            />
-            <Text style={styles.goalMeta}>
-              {(weeklyStats?.totalRuns || 0).toString()} runs this week
+            <Text style={styles.cardMeta}>
+              {(weeklyStats?.totalRuns || 0).toString()} runs synced this week
             </Text>
           </View>
+
+          <View style={styles.card}>
+            <Text style={styles.cardLabel}>LOCAL SQUAD RANK</Text>
+            <Text style={styles.rankValue}>{localRank ? `#${localRank}` : '--'}</Text>
+            <Text style={styles.cardMeta}>{locationLabel}</Text>
+            <Text style={styles.cardHint}>
+              Lifetime distance {totalDistance.toFixed(1)} km
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.mapPanel}>
+          <Image
+            source={{uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBO0nxRiiaFGe7NcBsFC1eRj1kr69dZxt7uTuvWhWVY3W-v36lPyNB3IG2rVIIsoBNtEUVj8wDZBmxplxlQFJZuQQ6rZnMT5Z67WIBArgTBQ0lt3ZMtLFsbJjslBPs_FzKJ_COLG_sowbyiKswrqcWbiMOwYB1ru7JcalIj1UPcnA5X6FRKo5egC-oYWBjLG65VIu-ot_YWThX7o7ruwGgN_IDVDDoi6KJQHIORBId_z1_TD8hqAJLnf-tnsUq5bfpmqooQFhh2sKWb'}}
+            style={styles.mapImage}
+          />
+          <View style={styles.mapOverlay} />
+          <View style={styles.routeLine} />
+          <View style={styles.routeDot} />
+          <Text style={styles.mapBadge}>LIVE TRACKING ACTIVE</Text>
+          <Text style={styles.mapTitle}>{locationLabel}</Text>
+          <Text style={styles.mapText}>
+            {localToday.length > 0
+              ? `${localToday.length} nearby runners loaded. Push harder to move up the board.`
+              : 'Sync your location to unlock nearby runners and local momentum.'}
+          </Text>
         </View>
 
         <View style={styles.previewGrid}>
@@ -188,16 +193,16 @@ const HomeScreen = ({navigation}: any) => {
               localToday.map((entry, index) => (
                 <View key={`${entry.userId}-${index}`} style={styles.previewRow}>
                   <Text style={styles.previewRank}>{entry.rank}</Text>
-                  <Text style={styles.previewName} numberOfLines={1}>
+                  <Text numberOfLines={1} style={styles.previewName}>
                     {entry.name}
                   </Text>
-                  <Text style={styles.previewDistance}>
+                  <Text style={styles.previewValue}>
                     {Number(entry.totalDistance || 0).toFixed(1)} km
                   </Text>
                 </View>
               ))
             ) : (
-              <Text style={styles.previewEmpty}>Sync location to load nearby ranks.</Text>
+              <Text style={styles.emptyText}>Local standings appear after your first synced GPS run.</Text>
             )}
           </View>
 
@@ -207,21 +212,21 @@ const HomeScreen = ({navigation}: any) => {
               cityWeekly.map((entry, index) => (
                 <View key={`${entry.userId}-${index}`} style={styles.previewRow}>
                   <Text style={styles.previewRank}>{entry.rank}</Text>
-                  <Text style={styles.previewName} numberOfLines={1}>
+                  <Text numberOfLines={1} style={styles.previewName}>
                     {entry.name}
                   </Text>
-                  <Text style={styles.previewDistance}>
+                  <Text style={styles.previewValue}>
                     {Number(entry.totalDistance || 0).toFixed(1)} km
                   </Text>
                 </View>
               ))
             ) : (
-              <Text style={styles.previewEmpty}>Your city board will appear after the first synced run.</Text>
+              <Text style={styles.emptyText}>City momentum will populate when leaderboard data is available.</Text>
             )}
           </View>
         </View>
 
-        <View style={{height: 120}} />
+        <View style={styles.footerSpace} />
       </ScrollView>
     </View>
   );
@@ -238,216 +243,263 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: Colors.surface,
   },
+  glowTop: {
+    position: 'absolute',
+    top: -160,
+    right: -120,
+    width: 340,
+    height: 340,
+    borderRadius: 999,
+    backgroundColor: Colors.primary + '14',
+  },
+  glowBottom: {
+    position: 'absolute',
+    bottom: -140,
+    left: -110,
+    width: 280,
+    height: 280,
+    borderRadius: 999,
+    backgroundColor: Colors.tertiaryContainer + '12',
+  },
   content: {
     paddingHorizontal: 20,
     paddingBottom: 24,
+    paddingTop: 24,
   },
-  locationBadge: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 999,
-    backgroundColor: Colors.surfaceContainerHigh,
-    marginBottom: 14,
-  },
-  locationBadgeText: {
-    color: Colors.primaryContainer,
+  kicker: {
+    color: Colors.primary + '99',
     fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 1.5,
+    fontWeight: '800',
+    letterSpacing: 2.4,
     textTransform: 'uppercase',
+    marginBottom: 6,
   },
-  heroLabel: {
-    fontFamily: 'Lexend-Bold',
-    fontSize: 12,
-    fontWeight: '700',
-    color: Colors.secondary,
-    letterSpacing: 3,
-    textTransform: 'uppercase',
-    marginBottom: 4,
-  },
-  heroValueRow: {
+  heroRow: {
     flexDirection: 'row',
-    alignItems: 'baseline',
-    gap: 8,
+    alignItems: 'flex-end',
+    marginBottom: 20,
   },
   heroValue: {
     fontFamily: 'Lexend-Bold',
-    fontSize: 98,
+    fontSize: 92,
+    lineHeight: 92,
     fontWeight: '900',
     color: Colors.onSurface,
-    letterSpacing: -4,
-    lineHeight: 108,
+    letterSpacing: -5,
   },
   heroUnit: {
-    fontFamily: 'Lexend-Bold',
-    fontSize: 24,
-    fontWeight: '700',
-    color: Colors.outline,
-    letterSpacing: 4,
-    textTransform: 'uppercase',
-  },
-  rankRow: {
-    flexDirection: 'row',
-    backgroundColor: Colors.surfaceContainerLow,
-    borderRadius: 18,
-    padding: 16,
-    alignItems: 'center',
-    gap: 16,
-    marginBottom: 20,
-  },
-  rankCard: {
-    flex: 1,
-  },
-  rankLabel: {
-    fontSize: 10,
     color: Colors.onSurfaceVariant,
+    fontSize: 22,
+    fontWeight: '700',
     letterSpacing: 2,
-    textTransform: 'uppercase',
-    marginBottom: 4,
+    marginLeft: 8,
+    marginBottom: 10,
   },
-  rankValue: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: Colors.tertiaryFixed,
-  },
-  rankGlobal: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: Colors.onSurface,
-  },
-  rankDivider: {
-    width: 1,
-    height: 40,
-    backgroundColor: Colors.outlineVariant + '4D',
-  },
-  startRunWrapper: {
+  startActionWrap: {
     marginBottom: 24,
   },
-  startRunButton: {
+  startAction: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    height: 82,
-    borderRadius: 18,
-    paddingHorizontal: 24,
-  },
-  playCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: Colors.onPrimaryFixed,
     alignItems: 'center',
-    justifyContent: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 20,
+    borderRadius: 24,
+    shadowColor: Colors.primary,
+    shadowOffset: {width: 0, height: 12},
+    shadowOpacity: 0.22,
+    shadowRadius: 24,
+    elevation: 8,
   },
-  playIcon: {
-    color: Colors.primaryContainer,
-    fontSize: 22,
-    marginLeft: 3,
-  },
-  startRunText: {
-    flex: 1,
-    fontSize: 22,
-    fontWeight: '900',
+  startActionText: {
     color: Colors.onPrimaryFixed,
-    letterSpacing: -1,
+    fontFamily: 'Lexend-Bold',
+    fontSize: 24,
+    fontWeight: '900',
     fontStyle: 'italic',
-    textTransform: 'uppercase',
-    marginLeft: 16,
+    letterSpacing: 0.5,
   },
-  chevron: {
-    fontSize: 32,
-    color: Colors.onPrimaryFixed + '66',
+  startActionArrow: {
+    color: Colors.onPrimaryFixed,
+    fontSize: 13,
+    fontWeight: '900',
+    letterSpacing: 2.4,
   },
   bentoGrid: {
-    flexDirection: 'row',
     gap: 16,
-    marginBottom: 18,
+    marginBottom: 22,
   },
-  lastRunCard: {
-    flex: 1,
+  card: {
     backgroundColor: Colors.surfaceContainerHigh,
-    borderRadius: 18,
-    padding: 20,
-    minHeight: 190,
-  },
-  activeTimeCard: {
-    flex: 1,
-    backgroundColor: Colors.surfaceContainerLow,
-    borderRadius: 18,
-    padding: 20,
-    minHeight: 190,
+    borderRadius: 32,
+    padding: 28,
+    minHeight: 220,
     justifyContent: 'space-between',
   },
+  cardLow: {
+    backgroundColor: Colors.surfaceContainerLow,
+  },
   cardLabel: {
+    color: Colors.onSurfaceVariant,
     fontSize: 10,
-    color: Colors.secondary,
+    fontWeight: '800',
     letterSpacing: 2,
     textTransform: 'uppercase',
+    marginBottom: 10,
   },
-  lastRunTitle: {
-    marginTop: 8,
+  cardTitle: {
     color: Colors.onSurface,
+    fontSize: 30,
+    fontFamily: 'Lexend-Bold',
+    fontWeight: '800',
+    fontStyle: 'italic',
+  },
+  metricRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 18,
+  },
+  metricValue: {
+    color: Colors.primary,
     fontSize: 22,
     fontWeight: '800',
   },
-  lastRunMeta: {
-    marginTop: 6,
+  metricCaption: {
     color: Colors.onSurfaceVariant,
-    fontSize: 12,
-  },
-  lastRunPace: {
-    marginTop: 10,
-    color: Colors.primaryContainer,
-    fontSize: 14,
+    fontSize: 10,
     fontWeight: '700',
+    letterSpacing: 1.5,
+    marginTop: 4,
   },
-  activeTimeValueRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    gap: 4,
+  highlightValue: {
+    color: Colors.secondary,
+    fontFamily: 'Lexend-Bold',
+    fontSize: 46,
+    fontWeight: '900',
+    fontStyle: 'italic',
   },
-  activeTimeValue: {
-    color: Colors.onSurface,
-    fontSize: 36,
-    fontWeight: '700',
-  },
-  activeTimeUnit: {
+  highlightUnit: {
     color: Colors.onSurfaceVariant,
-    fontSize: 12,
-    fontWeight: '700',
+    fontSize: 16,
   },
-  goalMeta: {
+  progressTrack: {
+    marginTop: 16,
+    height: 12,
+    borderRadius: 999,
+    backgroundColor: Colors.surfaceContainerHighest,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: 999,
+    backgroundColor: Colors.secondary,
+  },
+  rankValue: {
+    color: Colors.tertiary,
+    fontFamily: 'Lexend-Bold',
+    fontSize: 52,
+    fontWeight: '900',
+    fontStyle: 'italic',
+  },
+  cardMeta: {
+    color: Colors.onSurfaceVariant,
+    fontSize: 13,
+    lineHeight: 20,
     marginTop: 8,
-    color: Colors.onSurfaceVariant,
+  },
+  cardHint: {
+    color: Colors.primary,
     fontSize: 12,
+    fontWeight: '700',
+    marginTop: 10,
+  },
+  mapPanel: {
+    backgroundColor: Colors.surfaceContainerLow,
+    borderRadius: 32,
+    padding: 22,
+    overflow: 'hidden',
+    minHeight: 300,
+    marginBottom: 22,
+  },
+  mapImage: {
+    ...StyleSheet.absoluteFill,
+    width: '100%',
+    height: '100%',
+    opacity: 0.5,
+  },
+  mapOverlay: {
+    ...StyleSheet.absoluteFill,
+    backgroundColor: Colors.surfaceContainerLow + '44',
+  },
+  routeLine: {
+    position: 'absolute',
+    left: 34,
+    right: 46,
+    top: 92,
+    height: 4,
+    borderRadius: 999,
+    backgroundColor: Colors.primary,
+    transform: [{rotate: '-12deg'}],
+    shadowColor: Colors.primary,
+    shadowOpacity: 0.7,
+    shadowRadius: 10,
+    shadowOffset: {width: 0, height: 0},
+  },
+  routeDot: {
+    position: 'absolute',
+    right: 42,
+    top: 74,
+    width: 14,
+    height: 14,
+    borderRadius: 999,
+    backgroundColor: Colors.secondary,
+  },
+  mapBadge: {
+    color: Colors.onSurface,
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 2.2,
+    textTransform: 'uppercase',
+  },
+  mapTitle: {
+    color: Colors.onSurface,
+    fontFamily: 'Lexend-Bold',
+    fontSize: 26,
+    fontWeight: '800',
+    fontStyle: 'italic',
+    marginTop: 68,
+  },
+  mapText: {
+    color: Colors.onSurfaceVariant,
+    fontSize: 13,
+    lineHeight: 20,
+    marginTop: 8,
+    maxWidth: '78%',
   },
   previewGrid: {
-    gap: 14,
+    gap: 16,
   },
   previewCard: {
-    borderRadius: 18,
-    padding: 18,
-    backgroundColor: Colors.surfaceContainerLow,
-    borderWidth: 1,
-    borderColor: Colors.outlineVariant + '22',
+    backgroundColor: Colors.surfaceContainerHigh,
+    borderRadius: 24,
+    padding: 20,
   },
   previewTitle: {
     color: Colors.onSurface,
     fontSize: 14,
-    fontWeight: '800',
-    letterSpacing: 1.5,
+    fontWeight: '900',
+    letterSpacing: 1.4,
     textTransform: 'uppercase',
     marginBottom: 12,
   },
   previewRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    paddingVertical: 7,
   },
   previewRank: {
-    width: 24,
-    color: Colors.primaryContainer,
+    width: 28,
+    color: Colors.primary,
     fontSize: 12,
     fontWeight: '800',
   },
@@ -457,14 +509,17 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
   },
-  previewDistance: {
+  previewValue: {
     color: Colors.onSurfaceVariant,
     fontSize: 12,
   },
-  previewEmpty: {
+  emptyText: {
     color: Colors.onSurfaceVariant,
     fontSize: 13,
     lineHeight: 20,
+  },
+  footerSpace: {
+    height: 120,
   },
 });
 

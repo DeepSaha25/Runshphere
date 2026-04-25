@@ -6,11 +6,11 @@ import {
   StatusBar,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
-import GradientButton from '../components/GradientButton';
-import NeonInput from '../components/NeonInput';
+import LinearGradient from 'react-native-linear-gradient';
 import {useAuthStore} from '../store/authStore';
 import {Colors} from '../theme/colors';
 
@@ -18,8 +18,9 @@ const LoginScreen = ({navigation}: any) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<'login' | 'guest' | null>(null);
   const login = useAuthStore(state => state.login);
+  const loginAsGuest = useAuthStore(state => state.loginAsGuest);
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
@@ -27,7 +28,7 @@ const LoginScreen = ({navigation}: any) => {
       return;
     }
 
-    setLoading(true);
+    setLoading('login');
     try {
       await login({email: email.trim(), password});
     } catch (error: any) {
@@ -36,98 +37,129 @@ const LoginScreen = ({navigation}: any) => {
         error?.message || 'Please check your credentials and try again.',
       );
     } finally {
-      setLoading(false);
+      setLoading(null);
+    }
+  };
+
+  const handleGuestLogin = async () => {
+    setLoading('guest');
+    try {
+      await loginAsGuest();
+    } catch (error: any) {
+      Alert.alert(
+        'Guest mode unavailable',
+        error?.message || 'Please try again.',
+      );
+    } finally {
+      setLoading(null);
     }
   };
 
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={Colors.surface} />
-
-      <View style={styles.glowTopRight} />
-      <View style={styles.glowBottomLeft} />
+      <View style={styles.glowTop} />
+      <View style={styles.glowBottom} />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <View style={styles.logoRow}>
-            <Text style={styles.logoIcon}>⚡</Text>
-            <Text style={styles.logoText}>RUNSPHERE</Text>
-          </View>
-          <Text style={styles.welcomeText}>Welcome back</Text>
-          <Text style={styles.subtitle}>Ready to own your city again?</Text>
-        </View>
+        <Text style={styles.brand}>RUNSPHERE</Text>
+        <Text style={styles.hero}>Welcome{'\n'}Back</Text>
 
         <View style={styles.form}>
-          <NeonInput
-            label="Email Address"
-            placeholder="runner@kinetic.com"
-            icon="@"
-            keyboardType="email-address"
-            autoCapitalize="none"
+          <Text style={styles.fieldLabel}>CREDENTIALS</Text>
+          <TextInput
             value={email}
             onChangeText={setEmail}
+            placeholder="runner@sphere.io"
+            placeholderTextColor={Colors.outline}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            style={styles.input}
           />
-          <NeonInput
-            label="Security Key"
-            placeholder="••••••••"
-            icon="*"
-            isPassword
+
+          <View style={styles.passwordHeader}>
+            <Text style={styles.fieldLabel}>ACCESS KEY</Text>
+            <Text style={styles.linkText}>FORGOT?</Text>
+          </View>
+          <TextInput
             value={password}
             onChangeText={setPassword}
+            placeholder="........"
+            placeholderTextColor={Colors.outline}
+            secureTextEntry
+            style={styles.input}
           />
 
-          <View style={styles.optionsRow}>
-            <TouchableOpacity
-              style={styles.checkboxRow}
-              onPress={() => setRememberMe(value => !value)}>
-              <View
-                style={[
-                  styles.checkbox,
-                  rememberMe ? styles.checkboxChecked : undefined,
-                ]}>
-                {rememberMe ? <Text style={styles.checkmark}>✓</Text> : null}
-              </View>
-              <Text style={styles.rememberText}>Remember me</Text>
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <Text style={styles.forgotText}>FORGOT?</Text>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity
+            style={styles.checkboxRow}
+            onPress={() => setRememberMe(value => !value)}>
+            <View style={[styles.checkbox, rememberMe && styles.checkboxActive]} />
+            <Text style={styles.rememberText}>Remember me</Text>
+          </TouchableOpacity>
 
-          {loading ? (
-            <ActivityIndicator size="large" color={Colors.neonYellow} />
+          {loading === 'login' ? (
+            <ActivityIndicator size="large" color={Colors.primaryContainer} />
           ) : (
-            <GradientButton
-              title="Enter Sphere"
-              icon={<Text style={{fontSize: 18}}>⚡</Text>}
+            <TouchableOpacity
+              activeOpacity={0.92}
               onPress={handleLogin}
-            />
+              disabled={loading !== null}>
+              <LinearGradient colors={[Colors.primary, Colors.primaryContainer]} style={styles.primaryButton}>
+                <Text style={styles.primaryButtonText}>ENTER SPHERE</Text>
+              </LinearGradient>
+            </TouchableOpacity>
           )}
         </View>
 
+        <TouchableOpacity
+          activeOpacity={0.9}
+          style={styles.guestButton}
+          onPress={handleGuestLogin}
+          disabled={loading !== null}>
+          {loading === 'guest' ? (
+            <ActivityIndicator size="small" color={Colors.primary} />
+          ) : (
+            <>
+              <Text style={styles.guestButtonText}>CONTINUE AS GUEST</Text>
+              <Text style={styles.guestButtonMeta}>Try RunSphere with demo stats and local saves</Text>
+            </>
+          )}
+        </TouchableOpacity>
+
         <View style={styles.dividerRow}>
-          <View style={styles.dividerLine} />
-          <Text style={styles.dividerText}>INSTANT ACCESS</Text>
-          <View style={styles.dividerLine} />
+          <View style={styles.divider} />
+          <Text style={styles.dividerText}>OR INITIALIZE VIA</Text>
+          <View style={styles.divider} />
         </View>
 
-        <View style={styles.socialRow}>
-          <TouchableOpacity style={styles.socialButton}>
-            <Text style={styles.socialLabel}>GOOGLE</Text>
+        <View style={styles.altRow}>
+          <TouchableOpacity style={styles.altButton}>
+            <Text style={styles.altIcon}>fingerprint</Text>
+            <Text style={styles.altButtonText}>BIOMETRICS</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.socialButton}>
-            <Text style={styles.socialLabel}>APPLE</Text>
+          <TouchableOpacity style={styles.altButton}>
+            <Text style={styles.altIcon}>key</Text>
+            <Text style={styles.altButtonText}>PASSKEY</Text>
           </TouchableOpacity>
         </View>
 
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>
-            New to the grid?{' '}
-            <Text style={styles.joinLink} onPress={() => navigation.navigate('Signup')}>
-              JOIN NOW
-            </Text>
+        <View style={styles.systemFooter}>
+          <View>
+            <Text style={styles.systemLabel}>SYSTEM STATUS</Text>
+            <View style={styles.statusRow}>
+              <View style={styles.statusDot} />
+              <Text style={styles.statusText}>ACTIVE_ENGINE</Text>
+            </View>
+          </View>
+          <Text style={styles.versionText}>v4.2.0-STABLE</Text>
+        </View>
+
+        <Text style={styles.footerText}>
+          New to the grid?{' '}
+          <Text style={styles.footerLink} onPress={() => navigation.navigate('Signup')}>
+            JOIN NOW
           </Text>
-        </View>
+        </Text>
       </ScrollView>
     </View>
   );
@@ -138,159 +170,232 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.surface,
   },
-  glowTopRight: {
+  glowTop: {
     position: 'absolute',
-    top: -80,
-    right: -80,
-    width: 300,
-    height: 300,
-    borderRadius: 150,
-    backgroundColor: Colors.primary + '1A',
+    top: -100,
+    right: -100,
+    width: 320,
+    height: 320,
+    borderRadius: 999,
+    backgroundColor: Colors.primary + '12',
   },
-  glowBottomLeft: {
+  glowBottom: {
     position: 'absolute',
-    bottom: -80,
-    left: -80,
-    width: 250,
-    height: 250,
-    borderRadius: 125,
-    backgroundColor: Colors.secondary + '1A',
+    bottom: -120,
+    left: -90,
+    width: 260,
+    height: 260,
+    borderRadius: 999,
+    backgroundColor: Colors.tertiaryContainer + '10',
   },
   content: {
     flexGrow: 1,
     justifyContent: 'center',
     paddingHorizontal: 24,
-    paddingVertical: 40,
+    paddingVertical: 48,
   },
-  header: {
-    alignItems: 'center',
-    marginBottom: 40,
-  },
-  logoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 24,
-  },
-  logoIcon: {
-    fontSize: 28,
-    color: Colors.primaryContainer,
-  },
-  logoText: {
+  brand: {
+    color: Colors.primary,
     fontFamily: 'Lexend-Bold',
     fontSize: 24,
     fontWeight: '900',
     fontStyle: 'italic',
-    color: Colors.primaryContainer,
-    letterSpacing: 4,
+    textTransform: 'uppercase',
   },
-  welcomeText: {
+  hero: {
+    marginTop: 18,
+    color: Colors.onSurface,
     fontFamily: 'Lexend-Bold',
-    fontSize: 36,
-    fontWeight: '700',
-    color: Colors.white,
-    letterSpacing: -1,
-  },
-  subtitle: {
-    fontFamily: 'Inter-Regular',
-    fontSize: 16,
-    color: Colors.onSurfaceVariant,
-    marginTop: 4,
+    fontSize: 58,
+    lineHeight: 58,
+    fontWeight: '900',
+    letterSpacing: -3,
   },
   form: {
-    marginBottom: 24,
+    marginTop: 34,
+    gap: 14,
   },
-  optionsRow: {
+  fieldLabel: {
+    color: Colors.onSurfaceVariant,
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 2,
+    textTransform: 'uppercase',
+  },
+  input: {
+    backgroundColor: Colors.surfaceContainerLowest,
+    borderRadius: 18,
+    color: Colors.onSurface,
+    paddingHorizontal: 18,
+    paddingVertical: 18,
+    fontSize: 17,
+  },
+  passwordHeader: {
+    marginTop: 6,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 24,
-    paddingHorizontal: 4,
+  },
+  linkText: {
+    color: Colors.tertiary,
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 1.8,
+    textTransform: 'uppercase',
   },
   checkboxRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
+    marginTop: 4,
+    marginBottom: 10,
   },
   checkbox: {
-    width: 20,
-    height: 20,
+    width: 18,
+    height: 18,
     borderRadius: 4,
+    backgroundColor: Colors.surfaceContainerHigh,
     borderWidth: 1,
     borderColor: Colors.outlineVariant,
-    backgroundColor: Colors.surfaceContainer,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
-  checkboxChecked: {
-    backgroundColor: Colors.primaryContainer,
-    borderColor: Colors.primaryContainer,
-  },
-  checkmark: {
-    color: Colors.onPrimaryContainer,
-    fontSize: 12,
-    fontWeight: '900',
+  checkboxActive: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
   },
   rememberText: {
     color: Colors.onSurfaceVariant,
     fontSize: 14,
   },
-  forgotText: {
-    color: Colors.secondary,
-    fontSize: 12,
-    fontWeight: '700',
-    letterSpacing: 2,
+  primaryButton: {
+    borderRadius: 20,
+    paddingVertical: 18,
+    alignItems: 'center',
+  },
+  primaryButtonText: {
+    color: Colors.onPrimaryFixed,
+    fontFamily: 'Lexend-Bold',
+    fontSize: 20,
+    fontWeight: '900',
+    fontStyle: 'italic',
+  },
+  guestButton: {
+    marginTop: 18,
+    minHeight: 68,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: Colors.primary + '55',
+    backgroundColor: Colors.primary + '12',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+  },
+  guestButtonText: {
+    color: Colors.primary,
+    fontSize: 13,
+    fontWeight: '900',
+    letterSpacing: 1.6,
     textTransform: 'uppercase',
+  },
+  guestButtonMeta: {
+    marginTop: 6,
+    color: Colors.onSurfaceVariant,
+    fontSize: 12,
+    textAlign: 'center',
   },
   dividerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 20,
+    marginTop: 34,
+    marginBottom: 18,
   },
-  dividerLine: {
+  divider: {
     flex: 1,
     height: 1,
-    backgroundColor: Colors.outlineVariant + '4D',
+    backgroundColor: Colors.surfaceContainerHighest,
   },
   dividerText: {
     color: Colors.onSurfaceVariant,
     fontSize: 10,
-    letterSpacing: 3,
-    marginHorizontal: 16,
+    fontWeight: '800',
+    letterSpacing: 2,
+    textTransform: 'uppercase',
+    marginHorizontal: 14,
   },
-  socialRow: {
+  altRow: {
     flexDirection: 'row',
-    gap: 16,
-    marginBottom: 24,
+    gap: 12,
   },
-  socialButton: {
+  altButton: {
     flex: 1,
+    backgroundColor: Colors.surfaceContainerHigh,
+    borderRadius: 18,
+    paddingVertical: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 14,
-    borderRadius: 12,
-    backgroundColor: Colors.surfaceContainerHigh,
-    borderWidth: 1,
-    borderColor: Colors.outlineVariant + '33',
+    gap: 8,
   },
-  socialLabel: {
-    fontSize: 14,
-    fontWeight: '700',
+  altIcon: {
+    color: Colors.onSurfaceVariant,
+    fontSize: 10,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+  },
+  altButtonText: {
     color: Colors.onSurface,
-    letterSpacing: 1,
-  },
-  footer: {
-    alignItems: 'center',
-    paddingTop: 16,
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 1.6,
+    textTransform: 'uppercase',
   },
   footerText: {
+    marginTop: 28,
+    textAlign: 'center',
     color: Colors.onSurfaceVariant,
     fontSize: 14,
   },
-  joinLink: {
+  footerLink: {
+    color: Colors.primary,
     fontWeight: '900',
-    color: Colors.primaryContainer,
-    letterSpacing: 3,
+    letterSpacing: 1.2,
+  },
+  systemFooter: {
+    marginTop: 34,
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+    opacity: 0.45,
+  },
+  systemLabel: {
+    color: Colors.outlineVariant,
+    fontSize: 8,
+    fontWeight: '900',
+    letterSpacing: 2.2,
+    textTransform: 'uppercase',
+  },
+  statusRow: {
+    marginTop: 4,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+  },
+  statusDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 999,
+    backgroundColor: Colors.secondary,
+  },
+  statusText: {
+    color: Colors.secondary,
+    fontSize: 10,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+  },
+  versionText: {
+    color: Colors.outlineVariant,
+    fontSize: 8,
+    fontWeight: '900',
+    letterSpacing: 1.7,
     textTransform: 'uppercase',
   },
 });

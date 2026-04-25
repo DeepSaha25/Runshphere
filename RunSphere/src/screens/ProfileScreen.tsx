@@ -2,6 +2,7 @@ import React, {useCallback, useState} from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Image,
   RefreshControl,
   ScrollView,
   StatusBar,
@@ -13,7 +14,6 @@ import {
 import {useFocusEffect} from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 import AppHeader from '../components/AppHeader';
-import ProgressBar from '../components/ProgressBar';
 import {useAuthStore} from '../store/authStore';
 import {useUserStore} from '../store/userStore';
 import {Colors} from '../theme/colors';
@@ -110,6 +110,7 @@ const ProfileScreen = () => {
 
   const totalDistance = Number(stats?.totalDistance || profile?.totalDistance || 0);
   const totalRuns = Number(stats?.totalRuns || 0);
+  const weeklyDistance = Number(weeklyStats?.totalDistance || 0);
   const bestPace = recentRuns.reduce((best, run) => {
     const current = run.averagePace || (run.avgSpeed ? 60 / run.avgSpeed : 0);
     if (!best || (current && current < best)) {
@@ -117,17 +118,12 @@ const ProfileScreen = () => {
     }
     return best;
   }, 0);
-  const initials = profile?.name
-    ? profile.name
-        .split(' ')
-        .map((name: string) => name[0])
-        .join('')
-        .toUpperCase()
-    : 'RS';
+  const weeklyBars = [8.2, 12.4, 5.1, 21.0, 10.2, 15.5, 2.0];
+  const maxBar = Math.max(...weeklyBars);
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={Colors.surfaceDim} />
+      <StatusBar barStyle="light-content" backgroundColor={Colors.surface} />
       <AppHeader
         rightElement={
           <TouchableOpacity onPress={handleLogout}>
@@ -148,23 +144,25 @@ const ProfileScreen = () => {
         <View style={styles.heroSection}>
           <View style={styles.avatarShell}>
             <View style={styles.avatarInner}>
-              <Text style={styles.avatarText}>{initials}</Text>
+              <Image
+                source={{uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDw_zpHZ2KnGIz5vADzzvKqgSwBNlMb_80kQgwpfJ4Wlg5JJfgY6mKT1803P7OdQoQYfrJ8inPARgQBxDfkeHnmb_aUAanvP8kJOmfVRaUVFI1VTO-oWeq3_lcfXr9gu8vtLLU9qIV8CNCjpxHSEphKIHYbHod8mhwEZGNJlYZRyNA0pOvsmyh0_5ckZd3W9hFTfDCmiz3b6ufYPlBXxnH6ytQ6Qf6OfMqo7ErhgEx6U7l-en9ApVOwwUJun1tUeqPQhzSFmzoWUPdj'}}
+                style={styles.avatarImage}
+              />
             </View>
+            <View style={styles.statusBolt} />
           </View>
 
-          <View style={styles.nameBlock}>
+          <View style={styles.heroCopy}>
+            <Text style={styles.tierChip}>ELITE TIER</Text>
             <Text style={styles.nameText}>{profile?.name || 'Runner'}</Text>
-            <Text style={styles.emailText}>{profile?.email}</Text>
-            <Text style={styles.locationText}>
+            <Text style={styles.heroMeta}>
               {profile?.location?.city
                 ? `${profile.location.city}, ${profile.location.state || ''}`
                 : 'Location not synced'}
             </Text>
-          </View>
-
-          <View style={styles.streakCard}>
-            <Text style={styles.streakValue}>{profile?.streak || 0}</Text>
-            <Text style={styles.streakLabel}>DAY STREAK</Text>
+            <Text style={styles.heroMeta}>
+              Joined {profile?.createdAt ? new Date(profile.createdAt).toLocaleDateString() : 'recently'}
+            </Text>
           </View>
         </View>
 
@@ -173,52 +171,90 @@ const ProfileScreen = () => {
           onPress={handleSyncLocation}
           disabled={syncingLocation}>
           <Text style={styles.locationButtonText}>
-            {syncingLocation ? 'SYNCING GPS...' : 'SYNC LOCATION'}
+            {syncingLocation ? 'SYNCING GPS' : 'SYNC LOCATION'}
           </Text>
         </TouchableOpacity>
 
         <View style={styles.statsGrid}>
-          <View style={[styles.statCard, styles.statCardWide]}>
-            <Text style={styles.statLabel}>Lifetime Distance</Text>
-            <Text style={styles.statValueLarge}>{totalDistance.toFixed(1)}</Text>
-            <Text style={styles.statUnit}>KM</Text>
-          </View>
-
-          <View style={styles.statCard}>
-            <Text style={styles.statLabel}>Weekly Goal</Text>
-            <Text style={styles.statValueMedium}>
-              {Number(weeklyStats?.totalDistance || 0).toFixed(1)} / 25
+          <View style={styles.heroStat}>
+            <Text style={styles.statKicker}>LIFETIME DISTANCE</Text>
+            <Text style={styles.heroStatValue}>
+              {totalDistance.toFixed(0)} <Text style={styles.heroStatUnit}>KM</Text>
             </Text>
-            <ProgressBar
-              progress={Math.min(100, ((weeklyStats?.totalDistance || 0) / 25) * 100)}
-              color={Colors.secondary}
-            />
+            <Text style={styles.statTrend}>{weeklyDistance.toFixed(1)} km this week</Text>
           </View>
 
-          <View style={styles.statCard}>
-            <Text style={styles.statLabel}>Total Runs</Text>
-            <Text style={styles.statValueMedium}>{totalRuns}</Text>
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>PERFORMANCE SNAPSHOT</Text>
-          <View style={styles.snapshotRow}>
-            <View style={styles.snapshotCard}>
-              <Text style={styles.snapshotLabel}>Best Pace</Text>
-              <Text style={styles.snapshotValue}>{formatPace(bestPace)}</Text>
-            </View>
-            <View style={styles.snapshotCard}>
-              <Text style={styles.snapshotLabel}>Calories Burned</Text>
-              <Text style={styles.snapshotValue}>
-                {Math.round(stats?.caloriesBurned || 0)}
+          <View style={styles.miniGrid}>
+            <View style={styles.miniCard}>
+              <Text style={styles.miniLabel}>FASTEST 5K</Text>
+              <Text style={styles.miniValue}>
+                {bestPace ? formatPace(bestPace) : '--'}
               </Text>
+              <Text style={styles.miniHint}>BEST PACE</Text>
+            </View>
+            <View style={styles.miniCard}>
+              <Text style={styles.miniLabel}>STREAK</Text>
+              <Text style={styles.miniValue}>{profile?.streak || 0} DAYS</Text>
+              <Text style={styles.miniHint}>CURRENT RUN</Text>
+            </View>
+            <View style={styles.miniCard}>
+              <Text style={styles.miniLabel}>AVG PACE</Text>
+              <Text style={styles.miniValue}>
+                {stats?.averagePace ? formatPace(stats.averagePace) : '--'}
+              </Text>
+              <Text style={styles.miniHint}>STEADY CLIMB</Text>
+            </View>
+            <View style={styles.miniCard}>
+              <Text style={styles.miniLabel}>RUNS</Text>
+              <Text style={styles.miniValue}>{totalRuns}</Text>
+              <Text style={styles.miniHint}>TOTAL SESSIONS</Text>
             </View>
           </View>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>RECENT RUNS</Text>
+        <View style={styles.chartCard}>
+          <Text style={styles.chartKicker}>PERFORMANCE VIEW</Text>
+          <Text style={styles.chartTitle}>Weekly Volume</Text>
+          <View style={styles.barRow}>
+            {weeklyBars.map((value, index) => (
+              <View key={index} style={styles.barColumn}>
+                <View
+                  style={[
+                    styles.bar,
+                    {
+                      height: `${Math.max(12, (value / maxBar) * 100)}%`,
+                      backgroundColor: index === 3 ? Colors.primary : Colors.primary + '33',
+                    },
+                  ]}
+                />
+                <Text style={[styles.barLabel, index === 3 && styles.barLabelActive]}>
+                  {['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'][index]}
+                </Text>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        <View style={styles.achievementsCard}>
+          <Text style={styles.chartTitle}>Kinetic Achievements</Text>
+          <View style={styles.achievementGrid}>
+            {[
+              ['CENTURY CLUB', '100 runs completed'],
+              ['SONIC BOOM', 'Sub 4:00 pace 5K'],
+              ['APEX HUNTER', '10,000m elevation'],
+              ['MARATHONER', 'Locked: 42.2K run'],
+            ].map(([title, desc]) => (
+              <View key={title} style={styles.achievementItem}>
+                <View style={styles.achievementOrb} />
+                <Text style={styles.achievementTitle}>{title}</Text>
+                <Text style={styles.achievementDesc}>{desc}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        <View style={styles.runsSection}>
+          <Text style={styles.chartTitle}>Recent Runs</Text>
           {recentRuns.length === 0 ? (
             <View style={styles.emptySection}>
               <Text style={styles.emptySectionText}>
@@ -247,27 +283,21 @@ const ProfileScreen = () => {
           )}
         </View>
 
-        <View style={{height: 120}} />
+        <View style={styles.footerSpace} />
       </ScrollView>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.surfaceDim,
-  },
+  container: {flex: 1, backgroundColor: Colors.surface},
   loadingState: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: Colors.surfaceDim,
+    backgroundColor: Colors.surface,
   },
-  content: {
-    paddingHorizontal: 20,
-    paddingBottom: 24,
-  },
+  content: {paddingHorizontal: 24, paddingTop: 24, paddingBottom: 24},
   logoutText: {
     color: Colors.onSurfaceVariant,
     fontSize: 11,
@@ -276,160 +306,247 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   heroSection: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    gap: 16,
-    marginBottom: 20,
+    gap: 20,
+    marginBottom: 18,
   },
   avatarShell: {
-    width: 92,
-    height: 92,
-    borderRadius: 46,
-    padding: 3,
-    backgroundColor: Colors.primaryContainer,
+    width: 192,
+    height: 192,
+    borderRadius: 999,
+    alignSelf: 'center',
+    backgroundColor: Colors.primary,
+    padding: 5,
   },
   avatarInner: {
     flex: 1,
-    borderRadius: 44,
-    backgroundColor: Colors.surface,
+    borderRadius: 999,
+    backgroundColor: Colors.surfaceContainerLowest,
     alignItems: 'center',
     justifyContent: 'center',
   },
   avatarText: {
-    color: Colors.primaryContainer,
-    fontSize: 28,
+    color: Colors.onSurface,
+    fontFamily: 'Lexend-Bold',
+    fontSize: 44,
     fontWeight: '900',
   },
-  nameBlock: {
-    flex: 1,
-    minWidth: 180,
+  avatarImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 999,
+  },
+  statusBolt: {
+    position: 'absolute',
+    right: 10,
+    bottom: 10,
+    width: 26,
+    height: 26,
+    borderRadius: 999,
+    backgroundColor: Colors.secondary,
+    borderWidth: 3,
+    borderColor: Colors.surface,
+  },
+  heroCopy: {
+    alignItems: 'center',
+  },
+  tierChip: {
+    backgroundColor: Colors.tertiaryContainer + '26',
+    color: Colors.tertiary,
+    overflow: 'hidden',
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 1.8,
+    textTransform: 'uppercase',
   },
   nameText: {
+    marginTop: 14,
     color: Colors.onSurface,
-    fontSize: 30,
+    fontFamily: 'Lexend-Bold',
+    fontSize: 50,
     fontWeight: '900',
-    letterSpacing: -1,
-  },
-  emailText: {
-    marginTop: 4,
-    color: Colors.onSurfaceVariant,
-    fontSize: 14,
-  },
-  locationText: {
-    marginTop: 6,
-    color: Colors.secondary,
-    fontSize: 12,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 1.5,
-  },
-  streakCard: {
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderRadius: 18,
-    backgroundColor: 'rgba(20,31,56,0.7)',
-  },
-  streakValue: {
-    color: Colors.neonYellow,
-    fontSize: 28,
-    fontWeight: '900',
+    fontStyle: 'italic',
     textAlign: 'center',
-  },
-  streakLabel: {
-    color: Colors.onSurfaceVariant,
-    fontSize: 10,
-    letterSpacing: 2,
     textTransform: 'uppercase',
+  },
+  heroMeta: {
+    marginTop: 6,
+    color: Colors.onSurfaceVariant,
+    fontSize: 13,
   },
   locationButton: {
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 18,
+    borderRadius: 999,
     paddingVertical: 14,
     backgroundColor: Colors.surfaceContainerHigh,
     marginBottom: 18,
   },
   locationButtonText: {
-    color: Colors.primaryContainer,
+    color: Colors.primary,
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 1.6,
+    textTransform: 'uppercase',
+  },
+  statsGrid: {
+    gap: 16,
+    marginBottom: 20,
+  },
+  heroStat: {
+    backgroundColor: Colors.surfaceContainerLow,
+    borderRadius: 32,
+    padding: 28,
+  },
+  statKicker: {
+    color: Colors.primary,
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 1.8,
+    textTransform: 'uppercase',
+  },
+  heroStatValue: {
+    marginTop: 10,
+    color: Colors.onSurface,
+    fontFamily: 'Lexend-Bold',
+    fontSize: 56,
+    fontWeight: '900',
+    fontStyle: 'italic',
+    letterSpacing: -3,
+  },
+  heroStatUnit: {
+    color: Colors.primary,
+    fontSize: 20,
+  },
+  statTrend: {
+    marginTop: 8,
+    color: Colors.secondary,
     fontSize: 12,
+    fontWeight: '700',
+  },
+  miniGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  miniCard: {
+    width: '47.8%',
+    backgroundColor: Colors.surfaceContainerLow,
+    borderRadius: 22,
+    padding: 18,
+  },
+  miniLabel: {
+    color: Colors.onSurfaceVariant,
+    fontSize: 10,
     fontWeight: '800',
     letterSpacing: 1.5,
     textTransform: 'uppercase',
   },
-  statsGrid: {
+  miniValue: {
+    marginTop: 10,
+    color: Colors.onSurface,
+    fontFamily: 'Lexend-Bold',
+    fontSize: 24,
+    fontWeight: '800',
+    fontStyle: 'italic',
+  },
+  miniHint: {
+    marginTop: 8,
+    color: Colors.onSurfaceVariant,
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  chartCard: {
+    backgroundColor: Colors.surfaceContainerLow,
+    borderRadius: 32,
+    padding: 28,
+    marginBottom: 18,
+  },
+  chartKicker: {
+    color: Colors.primary,
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 1.8,
+    textTransform: 'uppercase',
+  },
+  chartTitle: {
+    marginTop: 6,
+    color: Colors.onSurface,
+    fontFamily: 'Lexend-Bold',
+    fontSize: 28,
+    fontWeight: '800',
+    fontStyle: 'italic',
+    marginBottom: 16,
+  },
+  barRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+    height: 180,
+    gap: 8,
+  },
+  barColumn: {
+    flex: 1,
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+  },
+  bar: {
+    width: '100%',
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+  },
+  barLabel: {
+    marginTop: 12,
+    color: Colors.onSurfaceVariant,
+    fontSize: 10,
+    fontWeight: '800',
+  },
+  barLabelActive: {
+    color: Colors.primary,
+  },
+  achievementsCard: {
+    backgroundColor: Colors.surfaceContainerHigh,
+    borderRadius: 24,
+    padding: 22,
+    marginBottom: 18,
+  },
+  achievementGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 12,
-    marginBottom: 24,
   },
-  statCard: {
-    flex: 1,
-    minWidth: '45%',
-    backgroundColor: 'rgba(20,31,56,0.72)',
+  achievementItem: {
+    width: '47.8%',
+    backgroundColor: Colors.surfaceContainerHighest,
     borderRadius: 20,
-    padding: 20,
-  },
-  statCardWide: {
-    minWidth: '100%',
-  },
-  statLabel: {
-    color: Colors.onSurfaceVariant,
-    fontSize: 10,
-    letterSpacing: 2,
-    textTransform: 'uppercase',
-  },
-  statValueLarge: {
-    marginTop: 12,
-    color: Colors.primaryContainer,
-    fontSize: 54,
-    fontWeight: '900',
-    letterSpacing: -2,
-  },
-  statUnit: {
-    color: Colors.onSurfaceVariant,
-    fontSize: 18,
-    fontWeight: '700',
-  },
-  statValueMedium: {
-    marginTop: 12,
-    marginBottom: 12,
-    color: Colors.onSurface,
-    fontSize: 28,
-    fontWeight: '800',
-  },
-  section: {
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    marginBottom: 14,
-    color: Colors.onSurface,
-    fontSize: 18,
-    fontWeight: '900',
-    letterSpacing: 1,
-    textTransform: 'uppercase',
-  },
-  snapshotRow: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  snapshotCard: {
-    flex: 1,
     padding: 16,
-    borderRadius: 18,
-    backgroundColor: Colors.surfaceContainerLow,
+    alignItems: 'center',
   },
-  snapshotLabel: {
-    color: Colors.onSurfaceVariant,
-    fontSize: 10,
-    letterSpacing: 2,
-    textTransform: 'uppercase',
+  achievementOrb: {
+    width: 48,
+    height: 48,
+    borderRadius: 999,
+    backgroundColor: Colors.primary + '22',
+    marginBottom: 12,
   },
-  snapshotValue: {
-    marginTop: 10,
+  achievementTitle: {
     color: Colors.onSurface,
-    fontSize: 20,
+    fontSize: 12,
     fontWeight: '800',
+    textAlign: 'center',
+  },
+  achievementDesc: {
+    marginTop: 6,
+    color: Colors.onSurfaceVariant,
+    fontSize: 11,
+    textAlign: 'center',
+    lineHeight: 16,
+  },
+  runsSection: {
+    marginBottom: 18,
   },
   emptySection: {
     padding: 18,
@@ -445,8 +562,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 16,
-    borderRadius: 18,
-    backgroundColor: Colors.surfaceContainerLow,
+    borderRadius: 22,
+    backgroundColor: Colors.surfaceContainerHigh,
     marginBottom: 10,
   },
   runDistance: {
@@ -463,7 +580,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   runPace: {
-    color: Colors.primaryContainer,
+    color: Colors.primary,
     fontSize: 14,
     fontWeight: '700',
   },
@@ -471,6 +588,9 @@ const styles = StyleSheet.create({
     marginTop: 4,
     color: Colors.onSurfaceVariant,
     fontSize: 12,
+  },
+  footerSpace: {
+    height: 120,
   },
 });
 
