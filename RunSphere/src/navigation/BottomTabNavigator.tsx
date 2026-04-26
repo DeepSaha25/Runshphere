@@ -3,6 +3,7 @@ import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import HomeScreen from '../screens/HomeScreen';
 import LeaderboardScreen from '../screens/LeaderboardScreen';
+import HistoryScreen from '../screens/HistoryScreen';
 import CommunityFeedScreen from '../screens/CommunityFeedScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import {Colors} from '../theme/colors';
@@ -13,6 +14,7 @@ const Tab = createBottomTabNavigator<MainTabParamList>();
 const TAB_CONFIG: Record<keyof MainTabParamList, {label: string}> = {
   Home: {label: 'Home'},
   Leaderboards: {label: 'Ranks'},
+  History: {label: 'Runs'},
   Community: {label: 'Social'},
   Profile: {label: 'Me'},
 };
@@ -57,6 +59,7 @@ const BottomTabNavigator = ({navigation}: any) => (
     )}>
     <Tab.Screen name="Home" component={HomeScreen} />
     <Tab.Screen name="Leaderboards" component={LeaderboardScreen} />
+    <Tab.Screen name="History" component={HistoryScreen} />
     <Tab.Screen name="Community" component={CommunityFeedScreen} />
     <Tab.Screen name="Profile" component={ProfileScreen} />
   </Tab.Navigator>

@@ -18,13 +18,16 @@ const CommunityFeedScreen = () => {
   const [posts, setPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const loadFeed = useCallback(async () => {
     try {
       const res = await CommunityService.getFeed(1, 20);
       setPosts(res.posts || []);
-    } catch {
+      setError(null);
+    } catch (loadError: any) {
       setPosts([]);
+      setError(loadError?.message || 'Unable to load community feed.');
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -61,34 +64,6 @@ const CommunityFeedScreen = () => {
     return `${Math.floor(diffHrs / 24)}D AGO`;
   };
 
-  const feedItems =
-    posts.length > 0
-      ? posts
-      : [
-          {
-            _id: 'demo-feed-1',
-            userId: {name: 'Marcus V.'},
-            text: 'Pushed the limits today. The new kinetic pace tracker kept me in the zone through the final 2km climb.',
-            createdAt: new Date().toISOString(),
-            likesCount: 128,
-            commentsCount: 24,
-            runId: {distance: 12.4, avgSpeed: 14.3},
-            image:
-              'https://lh3.googleusercontent.com/aida-public/AB6AXuAne9FKW939tNGLQIod-ppt6YfhXA64N3e4-ywP120nmGABnmeaU6BZO4uJMgnVms_Ogwpb0ItZ_pwOuyZ3z0WJWFnBAbt-w4ri8vnEn1K4lhw86jaJ24N-kCHL3zyCee7S_A6fpWygxHfOAoQYdOj-wyKjRJ7MJZhPrPWdEkK7eGClw3suyKlVZZhK4XnNGtQrqpjf93_ZUNz6Hf0u81jkA6Nka6qAXoE3QaJrGsHni4YQhZ93tu7P9be7xPqtNdxYhs6YG1y0b08M',
-          },
-          {
-            _id: 'demo-feed-2',
-            userId: {name: 'Elena Rodriguez'},
-            text: 'New personal record locked. Official split felt unreal under city lights.',
-            createdAt: new Date(Date.now() - 7200000).toISOString(),
-            likesCount: 92,
-            commentsCount: 18,
-            runId: {distance: 5.0, avgSpeed: 14.2},
-            image:
-              'https://lh3.googleusercontent.com/aida-public/AB6AXuA_LKa2DyuoNiCfoO2E_AEmY89BnUJsCqzU964IYhNTkfw4zOfNy-hzU2gBQ4eU-IZi1URRc5pm3k5HOgYj6MYixnrnqWbF6_hoTNuMs76gWikiTbTZSgLNQj5hW9E0o6_YgXW4ZEew7eL4dURMDPSxXNthycGifRcC8dNTLcBYCdSdQv5k1oZf7F1-NH0VKAVdwtYKi2vnjHcJVAifPiguA_opK9CjnGygJJKOxWRk8FdIVDGZo8J_Q_Rf5q1IHaWuzc0rG6VI7rOA',
-          },
-        ];
-
   if (loading) {
     return (
       <View style={styles.loadingState}>
@@ -119,19 +94,31 @@ const CommunityFeedScreen = () => {
           <TouchableOpacity style={styles.filterActive}>
             <Text style={styles.filterActiveText}>ALL ACTIVITY</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.filterInactive}>
+          <TouchableOpacity style={styles.filterInactive} disabled>
             <Text style={styles.filterInactiveText}>FOLLOWING</Text>
           </TouchableOpacity>
         </View>
 
-        {feedItems.map((post, index) => (
+        {error ? (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyTitle}>Community unavailable</Text>
+            <Text style={styles.emptyText}>{error}</Text>
+          </View>
+        ) : posts.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyTitle}>No activity yet</Text>
+            <Text style={styles.emptyText}>
+              Verified run posts will appear here when your community starts sharing.
+            </Text>
+          </View>
+        ) : posts.map((post, index) => (
             <View key={post._id || index} style={styles.feedCard}>
               <View style={styles.visualPanel}>
                 <Image
                   source={{
                     uri:
                       post.image ||
-                      'https://lh3.googleusercontent.com/aida-public/AB6AXuAne9FKW939tNGLQIod-ppt6YfhXA64N3e4-ywP120nmGABnmeaU6BZO4uJMgnVms_Ogwpb0ItZ_pwOuyZ3z0WJWFnBAbt-w4ri8vnEn1K4lhw86jaJ24N-kCHL3zyCee7S_A6fpWygxHfOAoQYdOj-wyKjRJ7MJZhPrPWdEkK7eGClw3suyKlVZZhK4XnNGtQrqpjf93_ZUNz6Hf0u81jkA6Nka6qAXoE3QaJrGsHni4YQhZ93tu7P9be7xPqtNdxYhs6YG1y0b08M',
+                      'https://images.unsplash.com/photo-1502904550040-7534597429ae?q=80&w=1200&auto=format&fit=crop',
                   }}
                   style={styles.feedImage}
                 />
@@ -154,8 +141,8 @@ const CommunityFeedScreen = () => {
                       <Text style={styles.userMeta}>{formatDate(post.createdAt)}</Text>
                     </View>
                   </View>
-                  <TouchableOpacity style={styles.followButton}>
-                    <Text style={styles.followText}>FOLLOW</Text>
+                  <TouchableOpacity style={styles.followButton} disabled>
+                    <Text style={styles.followText}>SOON</Text>
                   </TouchableOpacity>
                 </View>
 
@@ -185,7 +172,7 @@ const CommunityFeedScreen = () => {
                     <Text style={styles.engageLabel}>COMMENTS</Text>
                     <Text style={styles.engageCount}>{post.commentsCount || 0}</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.cheerButton}>
+                  <TouchableOpacity style={styles.cheerButton} disabled>
                     <Text style={styles.cheerText}>CHEER</Text>
                   </TouchableOpacity>
                 </View>

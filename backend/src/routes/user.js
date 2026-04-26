@@ -1,6 +1,7 @@
 const express = require('express');
 const authenticate = require('../middlewares/auth');
 const { validateLocationUpdate } = require('../middlewares/validators');
+const { locationLimiter } = require('../middlewares/rateLimits');
 const { getProfile, updateLocation, getStats } = require('../controllers/userController');
 
 const router = express.Router();
@@ -18,7 +19,7 @@ router.get('/profile', getProfile);
  * PUT /api/user/location
  * Update user location
  */
-router.put('/location', validateLocationUpdate, updateLocation);
+router.put('/location', locationLimiter, validateLocationUpdate, updateLocation);
 
 /**
  * GET /api/user/stats

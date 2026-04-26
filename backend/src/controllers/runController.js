@@ -6,47 +6,18 @@ const RunService = require('../services/runService');
 const submitRun = async (req, res, next) => {
   try {
     const userId = req.userId;
-    const { distance, duration, coordinates, date, elevationGain, caloriesBurned } = req.body;
+    const { clientRunId, coordinates } = req.body;
 
-    // Validation
-    if (distance === undefined || duration === undefined) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Distance (km) and duration (seconds) are required'
-      });
-    }
-
-    if (!Array.isArray(coordinates) || coordinates.length === 0) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Coordinates array is required and must not be empty'
-      });
-    }
-
-    // Parse numbers
-    const parsedDistance = parseFloat(distance);
-    const parsedDuration = parseInt(duration, 10);
-
-    if (isNaN(parsedDistance) || isNaN(parsedDuration)) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Distance and duration must be valid numbers'
-      });
-    }
-
-    const run = await RunService.submitRun(userId, {
-      distance: parsedDistance,
-      duration: parsedDuration,
+    const result = await RunService.submitRun(userId, {
+      clientRunId,
       coordinates,
-      date,
-      elevationGain,
-      caloriesBurned
     });
 
-    res.status(201).json({
+    res.status(result.created ? 201 : 200).json({
       status: 'success',
-      message: 'Run submitted successfully',
-      data: run
+      message: result.created ? 'Run submitted successfully' : 'Run already submitted',
+      data: result.run,
+      idempotent: !result.created
     });
   } catch (err) {
     next(err);

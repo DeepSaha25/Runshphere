@@ -18,13 +18,17 @@ const ensureLocation = (user, level) => {
     return 'User location not set. Please update your location first.';
   }
 
+  if (level === 'local' && (user?.location?.longitude === undefined || user?.location?.longitude === null)) {
+    return 'User location not set. Please update your location first.';
+  }
+
   return null;
 };
 
 const buildLeaderboardPayload = async (req, level, fetcher) => {
   const userId = req.userId;
   const { timePeriod = 'today', limit = 100 } = req.query;
-  const parsedLimit = parseInt(limit, 10);
+  const parsedLimit = Math.min(Math.max(parseInt(limit, 10) || 100, 1), 100);
   const user = await User.findById(userId);
 
   if (!user) {
@@ -124,9 +128,11 @@ const getCountryLeaderboard = async (req, res, next) => {
   try {
     const user = await User.findById(req.userId);
     const { timePeriod = 'today', limit = 100 } = req.query;
+    const parsedLimit = Math.min(Math.max(parseInt(limit, 10) || 100, 1), 100);
     const leaderboard = await LeaderboardService.getCountryLeaderboard(
+      user?.location || {},
       timePeriod,
-      parseInt(limit, 10),
+      parsedLimit,
       user?.timezone || 'Asia/Kolkata'
     );
 

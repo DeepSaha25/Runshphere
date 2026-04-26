@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const { getLocationFromCoordinates } = require('../utils/geocoding');
+const ApiError = require('../utils/ApiError');
 
 class UserService {
   /**
@@ -8,7 +9,7 @@ class UserService {
   static async getUserProfile(userId) {
     const user = await User.findById(userId);
     if (!user) {
-      throw new Error('User not found');
+      throw ApiError.notFound('User not found');
     }
     return user;
   }
@@ -38,7 +39,7 @@ class UserService {
       );
 
       if (!user) {
-        throw new Error('User not found');
+        throw ApiError.notFound('User not found');
       }
 
       return user;
@@ -53,7 +54,7 @@ class UserService {
   static async getUserStats(userId) {
     const user = await User.findById(userId);
     if (!user) {
-      throw new Error('User not found');
+      throw ApiError.notFound('User not found');
     }
 
     return {

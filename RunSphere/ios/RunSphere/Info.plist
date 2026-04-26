@@ -35,7 +35,15 @@
 		<true/>
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+	<string>RunSphere uses your location to track outdoor runs, calculate distance, and place verified runs on local leaderboards.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>RunSphere needs background location while a run is active so tracking continues when your phone is locked.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>RunSphere needs background location while a run is active so tracking continues when your phone is locked.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
+	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIRequiredDeviceCapabilities</key>

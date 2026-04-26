@@ -29,13 +29,14 @@ interface LiveRunMapProps {
   distanceKm: number;
   elevationGain: number;
   calories?: number;
+  gpsStatus?: string;
   status: 'idle' | 'running' | 'paused' | 'summary';
   onPauseResume: () => void;
   onFinish: () => void;
   onCancel: () => void;
 }
 
-const mapStyle = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json';
+const mapStyle = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
 
 const LiveRunMap = ({
   route,
@@ -43,6 +44,7 @@ const LiveRunMap = ({
   distanceKm,
   elevationGain,
   calories,
+  gpsStatus,
   status,
   onPauseResume,
   onFinish,
@@ -103,7 +105,7 @@ const LiveRunMap = ({
                   'line-join': 'round',
                 }}
                 paint={{
-                  'line-color': '#000000',
+                  'line-color': Colors.primary,
                   'line-width': 10,
                   'line-opacity': 0.12,
                 }}
@@ -116,7 +118,7 @@ const LiveRunMap = ({
                   'line-join': 'round',
                 }}
                 paint={{
-                  'line-color': '#111111',
+                  'line-color': Colors.primaryContainer,
                   'line-width': 5,
                 }}
               />
@@ -129,9 +131,9 @@ const LiveRunMap = ({
               type="circle"
               filter={['==', ['get', 'kind'], 'start']}
               paint={{
-                'circle-color': '#18A957',
+                'circle-color': Colors.secondary,
                 'circle-radius': 7,
-                'circle-stroke-color': '#FFFFFF',
+                'circle-stroke-color': Colors.onSurface,
                 'circle-stroke-width': 3,
               }}
             />
@@ -156,6 +158,7 @@ const LiveRunMap = ({
 
       <View style={styles.statsPanel}>
         <View style={styles.heroCard}>
+          <Text style={styles.gpsStatus}>{gpsStatus || 'GPS ready'}</Text>
           <Text style={styles.timer}>{formatClock(elapsedSeconds)}</Text>
           <View style={styles.distanceRow}>
             <Text style={styles.primaryValue}>{distanceKm.toFixed(2)}</Text>
@@ -204,7 +207,7 @@ const LiveRunMap = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F6F7F4',
+    backgroundColor: Colors.surface,
   },
   mapPanel: {
     flex: 1,
@@ -212,7 +215,7 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 26,
     borderBottomRightRadius: 26,
     overflow: 'hidden',
-    backgroundColor: '#EDEFEB',
+    backgroundColor: Colors.surfaceContainerLow,
   },
   map: {
     flex: 1,
@@ -228,15 +231,15 @@ const styles = StyleSheet.create({
     width: 54,
     height: 54,
     borderRadius: 27,
-    backgroundColor: 'rgba(23,105,255,0.14)',
+    backgroundColor: Colors.primary + '22',
   },
   markerCore: {
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: '#101214',
+    backgroundColor: Colors.surface,
     borderWidth: 5,
-    borderColor: '#FFFFFF',
+    borderColor: Colors.onSurface,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000000',
@@ -255,16 +258,16 @@ const styles = StyleSheet.create({
     borderBottomWidth: 22,
     borderLeftColor: 'transparent',
     borderRightColor: 'transparent',
-    borderBottomColor: '#2AF598',
+    borderBottomColor: Colors.secondary,
   },
   markerCenter: {
     width: 7,
     height: 7,
     borderRadius: 99,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.onSurface,
   },
   pausedDot: {
-    backgroundColor: '#F5A524',
+    backgroundColor: Colors.tertiary,
   },
   statsPanel: {
     flexShrink: 0,
@@ -275,7 +278,7 @@ const styles = StyleSheet.create({
   },
   heroCard: {
     borderRadius: 24,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.surfaceContainerLow,
     paddingHorizontal: 18,
     paddingVertical: 14,
     alignItems: 'center',
@@ -286,11 +289,19 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   timer: {
-    color: '#111111',
+    color: Colors.onSurface,
     fontSize: 40,
     lineHeight: 46,
     fontWeight: '900',
     textAlign: 'center',
+  },
+  gpsStatus: {
+    color: Colors.onSurfaceVariant,
+    fontSize: 11,
+    fontWeight: '900',
+    letterSpacing: 1.4,
+    textTransform: 'uppercase',
+    marginBottom: 4,
   },
   distanceRow: {
     marginTop: 6,
@@ -299,7 +310,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   primaryValue: {
-    color: '#111111',
+    color: Colors.onSurface,
     fontSize: 48,
     lineHeight: 52,
     fontWeight: '900',
@@ -307,7 +318,7 @@ const styles = StyleSheet.create({
   },
   primaryLabel: {
     marginLeft: 8,
-    color: '#747B83',
+    color: Colors.onSurfaceVariant,
     fontSize: 18,
     fontWeight: '900',
   },
@@ -320,24 +331,24 @@ const styles = StyleSheet.create({
     flex: 1,
     minHeight: 82,
     borderRadius: 18,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.surfaceContainerHigh,
     padding: 12,
   },
   statLabel: {
-    color: '#7A8088',
+    color: Colors.onSurfaceVariant,
     fontSize: 11,
     fontWeight: '900',
     textTransform: 'uppercase',
   },
   statValue: {
     marginTop: 6,
-    color: '#111111',
+    color: Colors.onSurface,
     fontSize: 20,
     fontWeight: '900',
   },
   statUnit: {
     marginTop: 2,
-    color: '#8A9097',
+    color: Colors.onSurfaceVariant,
     fontSize: 11,
     fontWeight: '800',
   },
@@ -345,7 +356,7 @@ const styles = StyleSheet.create({
     marginTop: 18,
     minHeight: 72,
     borderRadius: 28,
-    backgroundColor: 'rgba(255,255,255,0.96)',
+    backgroundColor: Colors.surfaceContainerHigh,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
@@ -360,12 +371,12 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 50,
     borderRadius: 17,
-    backgroundColor: '#F2F3F4',
+    backgroundColor: Colors.surfaceContainerHighest,
     alignItems: 'center',
     justifyContent: 'center',
   },
   secondaryButtonText: {
-    color: '#42464D',
+    color: Colors.onSurfaceVariant,
     fontSize: 13,
     fontWeight: '900',
     textTransform: 'uppercase',
@@ -374,15 +385,15 @@ const styles = StyleSheet.create({
     flex: 1.2,
     height: 54,
     borderRadius: 19,
-    backgroundColor: '#111111',
+    backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   resumeButton: {
-    backgroundColor: '#18A957',
+    backgroundColor: Colors.secondary,
   },
   primaryButtonText: {
-    color: '#FFFFFF',
+    color: Colors.onPrimaryFixed,
     fontSize: 15,
     fontWeight: '900',
     textTransform: 'uppercase',
@@ -391,12 +402,12 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 50,
     borderRadius: 17,
-    backgroundColor: '#FFE8E6',
+    backgroundColor: Colors.errorContainer,
     alignItems: 'center',
     justifyContent: 'center',
   },
   stopButtonText: {
-    color: '#D93025',
+    color: Colors.onErrorContainer,
     fontSize: 13,
     fontWeight: '900',
     textTransform: 'uppercase',

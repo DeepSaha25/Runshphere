@@ -1,12 +1,16 @@
 import ApiClient from './apiClient';
 
 export interface RunPayload {
-  distance: number;
-  duration: number;
-  coordinates: Array<{ latitude: number; longitude: number; timestamp?: string }>;
-  date?: string;
-  elevationGain?: number;
-  caloriesBurned?: number;
+  clientRunId: string;
+  coordinates: Array<{
+    latitude: number;
+    longitude: number;
+    timestamp: string;
+    altitude?: number | null;
+    accuracy?: number | null;
+    speed?: number | null;
+    heading?: number | null;
+  }>;
 }
 
 const RunService = {

@@ -1,7 +1,6 @@
 import React, {useCallback, useMemo, useState} from 'react';
 import {
   ActivityIndicator,
-  Image,
   RefreshControl,
   ScrollView,
   StatusBar,
@@ -22,25 +21,13 @@ const scopeTabs: {label: string; value: LeaderboardLevel}[] = [
   {label: 'District', value: 'district'},
 ];
 
-const podiumImages = [
-  'https://lh3.googleusercontent.com/aida-public/AB6AXuBK6lFeZVGQdWbmQVUa3t_p9iCUqItME5VDiJMze8T-D6DyqNzavtkKHW80NTu-08RJxq8V85RYX3HvEdNsWnzhwUfnMktsvKUEoVIk5xTpdcEn_6XG8IRJqIw2qOu1NjY1eRuzJLLScDCGQoG1FDWwovobm0mOQxgFVUzCtamV_GkaPk9WPcb77WGLkIJ4rpJAv-AlHDauivnsGI9Ir9ChE3hiG0W1HCKBcwH4lhiIs7iq3nQuqN3UQQAC4mla3ED7TLyTdIIXPahq',
-  'https://lh3.googleusercontent.com/aida-public/AB6AXuCIiKMTP7hKDof2YMEFR9FK_KLNZ7gz6V1vbcLPuBCoqogZJBs7kBQ1sXic9LbACQQbZ46_qceBEPWx0YjK-rUu9WAw5WOh2mm8a5v22nQ_ckqKEk27005C-Xf4JzZpIWXoAcUtmvw0H8Axn64Uo9PObonwxfdNzqMpntT8qTEfF8oHnQd69YrP2ry_hEj9V0Uq_OcOGEwLTz0C0NDAHLFruSMIAWdGLihsjs7DiRWa7e0L5cuBbeCF95UuuTcTUjZSQI6HRKcwbpOg',
-  'https://lh3.googleusercontent.com/aida-public/AB6AXuCq64-gqunUa5rvuKcdA4aQe477_mesyD9J2MPhJhoG3PALuuqXc6nsG4RxrbpNL6VjOgWceNjvBYJvCeblW1KDQUWypl-cBH3KoaFsWgQHFfJ_joG8kvXAcwvqyFdUgWhzx8H7WMWb1DS4oj3YcjsOMSs62zIQ-eEoH-VGIIID_TCt08Md1MMyK_hVlquxg1umQDDOYBImQmB-dOTFaQ-i-o31JSxuNF2JkA5ptV-JwikY1at2ytWwaGVy2FrDFrWzhJK04DeotK2I',
-];
-
-const fallbackRows = [
-  {rank: 4, name: 'David Sterling', totalDistance: 72.1, totalRuns: 32},
-  {rank: 5, name: 'Alex Rivers', totalDistance: 68.4, totalRuns: 28, you: true},
-  {rank: 6, name: 'Marcus Kane', totalDistance: 65.2, totalRuns: 24},
-  {rank: 7, name: 'Elena Rossi', totalDistance: 61.9, totalRuns: 21},
-];
-
 const LeaderboardScreen = () => {
   const [scope, setScope] = useState<LeaderboardLevel>('local');
   const period: TimePeriod = 'weekly';
   const loadLeaderboard = useLeaderboardStore(state => state.loadLeaderboard);
   const entriesState = useLeaderboardStore(state => state.entries);
   const loadingState = useLeaderboardStore(state => state.loading);
+  const errorsState = useLeaderboardStore(state => state.errors);
   const [refreshing, setRefreshing] = useState(false);
 
   const currentKey = `${scope}:${period}` as const;
@@ -49,6 +36,7 @@ const LeaderboardScreen = () => {
     [currentKey, entriesState],
   );
   const loading = loadingState[currentKey];
+  const error = errorsState[currentKey];
 
   const loadCurrent = useCallback(async () => {
     await loadLeaderboard(scope, period, 30);
@@ -69,15 +57,18 @@ const LeaderboardScreen = () => {
     }
   };
 
+  const podiumEntries = useMemo(() => {
+    const topThree = entries.slice(0, 3);
+    return [topThree[1], topThree[0], topThree[2]].filter(Boolean);
+  }, [entries]);
+
   const rows = useMemo(() => {
-    const mapped = entries.slice(3, 7).map((entry: any, index: number) => ({
+    return entries.slice(3, 12).map((entry: any, index: number) => ({
       rank: entry.rank || index + 4,
       name: entry.name,
       totalDistance: Number(entry.totalDistance || 0),
       totalRuns: Number(entry.totalRuns || 0),
     }));
-
-    return mapped.length ? mapped : fallbackRows;
   }, [entries]);
 
   if (loading && entries.length === 0) {
@@ -121,18 +112,30 @@ const LeaderboardScreen = () => {
           ))}
         </View>
 
-        <View style={styles.podium}>
-          {[
-            {rank: 2, name: 'M. Chen', distance: 84.2, image: podiumImages[0]},
-            {rank: 1, name: 'Apex Runner', distance: 120.5, image: podiumImages[1]},
-            {rank: 3, name: 'L. Vazquez', distance: 79.8, image: podiumImages[2]},
-          ].map(item => {
+        {error ? (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyTitle}>Leaderboard unavailable</Text>
+            <Text style={styles.emptyText}>{error}</Text>
+          </View>
+        ) : entries.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyTitle}>No rankings yet</Text>
+            <Text style={styles.emptyText}>
+              Complete a verified GPS run to unlock this board.
+            </Text>
+          </View>
+        ) : (
+          <>
+            <View style={styles.podium}>
+              {podiumEntries.map((item: any) => {
             const isWinner = item.rank === 1;
             return (
-              <View key={item.rank} style={styles.podiumItem}>
+              <View key={item.userId || item.rank} style={styles.podiumItem}>
                 <View style={[styles.podiumGlow, isWinner && styles.podiumGlowWinner]} />
                 <View style={[styles.podiumAvatarWrap, isWinner && styles.winnerAvatarWrap]}>
-                  <Image source={{uri: item.image}} style={styles.podiumAvatar} />
+                  <Text style={styles.podiumInitial}>
+                    {(item.name || 'R').slice(0, 1).toUpperCase()}
+                  </Text>
                 </View>
                 <View style={[styles.rankBadge, isWinner && styles.rankBadgeWinner]}>
                   <Text style={styles.rankBadgeText}>{item.rank}</Text>
@@ -141,14 +144,14 @@ const LeaderboardScreen = () => {
                   {item.name}
                 </Text>
                 <Text style={[styles.podiumDistance, isWinner && styles.podiumDistanceWinner]}>
-                  {item.distance.toFixed(1)} <Text style={styles.unitText}>KM</Text>
+                  {Number(item.totalDistance || 0).toFixed(1)} <Text style={styles.unitText}>KM</Text>
                 </Text>
               </View>
             );
-          })}
-        </View>
+              })}
+            </View>
 
-        <View style={styles.rows}>
+            <View style={styles.rows}>
           {rows.map((entry: any) => (
             <View key={`${entry.rank}-${entry.name}`} style={[styles.row, entry.you && styles.youRow]}>
               <View style={styles.rowLeft}>
@@ -175,7 +178,9 @@ const LeaderboardScreen = () => {
               </View>
             </View>
           ))}
-        </View>
+            </View>
+          </>
+        )}
 
         <View style={styles.footerSpace} />
       </ScrollView>
@@ -293,10 +298,11 @@ const styles = StyleSheet.create({
     height: 112,
     backgroundColor: Colors.primary,
   },
-  podiumAvatar: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 999,
+  podiumInitial: {
+    color: Colors.onPrimaryFixed,
+    fontFamily: 'Lexend-Bold',
+    fontSize: 30,
+    fontWeight: '900',
   },
   rankBadge: {
     marginTop: -20,
@@ -343,6 +349,25 @@ const styles = StyleSheet.create({
   },
   rows: {
     gap: 14,
+  },
+  emptyState: {
+    borderRadius: 28,
+    backgroundColor: Colors.surfaceContainerLow,
+    padding: 24,
+    marginBottom: 36,
+  },
+  emptyTitle: {
+    color: Colors.onSurface,
+    fontFamily: 'Lexend-Bold',
+    fontSize: 22,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+  },
+  emptyText: {
+    marginTop: 8,
+    color: Colors.onSurfaceVariant,
+    fontSize: 14,
+    lineHeight: 22,
   },
   row: {
     borderRadius: 32,

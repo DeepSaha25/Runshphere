@@ -83,6 +83,11 @@ if (localPropertiesFile.exists()) {
 def googleMapsApiKey = localProperties
     .getProperty("GOOGLE_MAPS_API_KEY", "")
     .replace("\"", "")
+def releaseStoreFile = localProperties.getProperty("RUNSPHERE_RELEASE_STORE_FILE", System.getenv("RUNSPHERE_RELEASE_STORE_FILE") ?: "")
+def releaseStorePassword = localProperties.getProperty("RUNSPHERE_RELEASE_STORE_PASSWORD", System.getenv("RUNSPHERE_RELEASE_STORE_PASSWORD") ?: "")
+def releaseKeyAlias = localProperties.getProperty("RUNSPHERE_RELEASE_KEY_ALIAS", System.getenv("RUNSPHERE_RELEASE_KEY_ALIAS") ?: "")
+def releaseKeyPassword = localProperties.getProperty("RUNSPHERE_RELEASE_KEY_PASSWORD", System.getenv("RUNSPHERE_RELEASE_KEY_PASSWORD") ?: "")
+def hasReleaseSigning = releaseStoreFile && releaseStorePassword && releaseKeyAlias && releaseKeyPassword
 
 android {
     ndkVersion rootProject.ext.ndkVersion
@@ -107,7 +112,8 @@ android {
             }
         }
         manifestPlaceholders = [
-            GOOGLE_MAPS_API_KEY: googleMapsApiKey
+            GOOGLE_MAPS_API_KEY: googleMapsApiKey,
+            usesCleartextTraffic: "false"
         ]
     }
     signingConfigs {
@@ -117,15 +123,25 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+        if (hasReleaseSigning) {
+            release {
+                storeFile file(releaseStoreFile)
+                storePassword releaseStorePassword
+                keyAlias releaseKeyAlias
+                keyPassword releaseKeyPassword
+            }
+        }
     }
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
+            manifestPlaceholders += [usesCleartextTraffic: "true"]
         }
         release {
-            // Caution! In production, you need to generate your own keystore file.
-            // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
+            if (hasReleaseSigning) {
+                signingConfig signingConfigs.release
+            }
+            manifestPlaceholders += [usesCleartextTraffic: "false"]
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }

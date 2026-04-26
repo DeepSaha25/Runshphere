@@ -1,31 +1,42 @@
-const Run = require('../models/Run');
+const DailyAggregate = require('../models/DailyAggregate');
 const moment = require('moment-timezone');
+const ApiError = require('../utils/ApiError');
+const mongoose = require('mongoose');
+
+const CACHE_TTL_MS = 30 * 1000;
+const leaderboardCache = new Map();
+const VALID_PERIODS = new Set(['today', 'weekly', 'week', 'monthly', 'month']);
+const VALID_LEVELS = new Set(['local', 'city', 'district', 'state', 'country']);
 
 class LeaderboardService {
-  /**
-   * Generate leaderboard at a specific geographic level
-   */
   static async generateLeaderboard(level, userLocation = {}, timePeriod = 'today', limit = 100, timezone = 'Asia/Kolkata') {
-    // Determine date range based on time period
-    const dateRange = this.getDateRange(timePeriod, timezone);
+    const safeLevel = this.validateLevel(level);
+    const safePeriod = this.validateTimePeriod(timePeriod);
+    const safeLimit = this.validateLimit(limit);
+    const dateRange = this.getDateRange(safePeriod, timezone);
+    const matchStage = this.buildMatchStage(safeLevel, userLocation, dateRange);
+    const cacheKey = this.getCacheKey(safeLevel, userLocation, safePeriod, safeLimit, dateRange);
+    const cached = leaderboardCache.get(cacheKey);
 
-    // Build query based on geographic level
-    const matchStage = this.buildMatchStage(level, userLocation, dateRange);
+    if (cached && cached.expiresAt > Date.now()) {
+      return cached.value;
+    }
 
-    // Aggregate runs by user
-    const pipeline = [
+    const aggregates = await DailyAggregate.aggregate([
       { $match: matchStage },
       {
         $group: {
           _id: '$userId',
-          totalDistance: { $sum: '$distance' },
-          totalRuns: { $sum: 1 },
-          avgSpeed: { $avg: '$avgSpeed' },
-          averagePace: { $avg: '$averagePace' },
-          lastRunAt: { $max: '$date' }
+          totalDistance: { $sum: '$totalDistance' },
+          totalDuration: { $sum: '$totalDuration' },
+          totalRuns: { $sum: '$totalRuns' },
+          caloriesBurned: { $sum: '$caloriesBurned' },
+          elevationGain: { $sum: '$elevationGain' },
+          lastRunAt: { $max: '$lastRunAt' }
         }
       },
       { $sort: { totalDistance: -1, lastRunAt: 1, _id: 1 } },
+      { $limit: safeLimit },
       {
         $lookup: {
           from: 'users',
@@ -34,112 +45,119 @@ class LeaderboardService {
           as: 'user'
         }
       },
-      { $unwind: '$user' },
-      { $limit: limit }
-    ];
+      { $unwind: '$user' }
+    ]);
 
-    const runAggregates = await Run.aggregate(pipeline);
+    const value = aggregates.map((aggregate, index) => this.toLeaderboardEntry(aggregate, index));
+    leaderboardCache.set(cacheKey, {
+      value,
+      expiresAt: Date.now() + CACHE_TTL_MS
+    });
 
-    return runAggregates.map((aggregate, index) => ({
-      rank: index + 1,
-      userId: aggregate.user._id,
-      name: aggregate.user.name,
-      avatar: aggregate.user.avatar || null,
-      totalDistance: Math.round((aggregate.totalDistance || 0) * 100) / 100,
-      totalRuns: aggregate.totalRuns,
-      avgSpeed: Math.round((aggregate.avgSpeed || 0) * 100) / 100,
-      averagePace: Math.round((aggregate.averagePace || 0) * 100) / 100,
-      streak: aggregate.user.streak,
-      lastRunAt: aggregate.lastRunAt,
-      location: {
-        city: aggregate.user.location?.city || null,
-        district: aggregate.user.location?.district || null,
-        state: aggregate.user.location?.state || null,
-        country: aggregate.user.location?.country || null
-      }
-    }));
+    return value;
   }
 
-  /**
-   * Get local leaderboard (city level)
-   */
   static async getLocalLeaderboard(userLocation, timePeriod = 'today', limit = 100, timezone = 'Asia/Kolkata') {
     return this.generateLeaderboard('local', userLocation, timePeriod, limit, timezone);
   }
 
-  /**
-   * Get city leaderboard
-   */
   static async getCityLeaderboard(userLocation, timePeriod = 'today', limit = 100, timezone = 'Asia/Kolkata') {
     return this.generateLeaderboard('city', userLocation, timePeriod, limit, timezone);
   }
 
-  /**
-   * Get district leaderboard
-   */
   static async getDistrictLeaderboard(userLocation, timePeriod = 'today', limit = 100, timezone = 'Asia/Kolkata') {
     return this.generateLeaderboard('district', userLocation, timePeriod, limit, timezone);
   }
 
-  /**
-   * Get state leaderboard
-   */
   static async getStateLeaderboard(userLocation, timePeriod = 'today', limit = 100, timezone = 'Asia/Kolkata') {
     return this.generateLeaderboard('state', userLocation, timePeriod, limit, timezone);
   }
 
-  /**
-   * Get country leaderboard
-   */
-  static async getCountryLeaderboard(timePeriod = 'today', limit = 100, timezone = 'Asia/Kolkata') {
-    return this.generateLeaderboard('country', {}, timePeriod, limit, timezone);
+  static async getCountryLeaderboard(userLocation = {}, timePeriod = 'today', limit = 100, timezone = 'Asia/Kolkata') {
+    return this.generateLeaderboard('country', userLocation, timePeriod, limit, timezone);
   }
 
-  /**
-   * Get user rank at a specific level
-   */
   static async getUserRank(userId, level, userLocation, timePeriod = 'today', timezone = 'Asia/Kolkata') {
-    const leaderboard = await this.generateLeaderboard(level, userLocation, timePeriod, 10000, timezone);
-    const userRank = leaderboard.find((entry) => entry.userId.toString() === userId.toString());
-    return userRank || null;
+    const safeLevel = this.validateLevel(level);
+    const safePeriod = this.validateTimePeriod(timePeriod);
+    const dateRange = this.getDateRange(safePeriod, timezone);
+    const matchStage = this.buildMatchStage(safeLevel, userLocation, dateRange);
+
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+    const [userAggregate] = await DailyAggregate.aggregate([
+      { $match: { ...matchStage, userId: userObjectId } },
+      {
+        $group: {
+          _id: '$userId',
+          totalDistance: { $sum: '$totalDistance' },
+          totalDuration: { $sum: '$totalDuration' },
+          totalRuns: { $sum: '$totalRuns' },
+          lastRunAt: { $max: '$lastRunAt' }
+        }
+      }
+    ]);
+
+    if (!userAggregate) {
+      return null;
+    }
+
+    const [{ ahead = 0 } = {}] = await DailyAggregate.aggregate([
+      { $match: matchStage },
+      {
+        $group: {
+          _id: '$userId',
+          totalDistance: { $sum: '$totalDistance' },
+          lastRunAt: { $max: '$lastRunAt' }
+        }
+      },
+      {
+        $match: {
+          $or: [
+            { totalDistance: { $gt: userAggregate.totalDistance } },
+            {
+              totalDistance: userAggregate.totalDistance,
+              lastRunAt: { $lt: userAggregate.lastRunAt }
+            }
+          ]
+        }
+      },
+      { $count: 'ahead' }
+    ]);
+
+    return {
+      ...this.toLeaderboardEntry({ ...userAggregate, user: { _id: userObjectId, name: null, location: {} } }, ahead),
+      rank: ahead + 1
+    };
   }
 
-  // ==================== HELPER METHODS ====================
-
-  /**
-   * Get date range based on time period
-   */
   static getDateRange(timePeriod, timezone = 'Asia/Kolkata') {
     const now = moment.tz(timezone);
 
     if (timePeriod === 'weekly' || timePeriod === 'week') {
       return {
-        start: now.clone().startOf('isoWeek').toDate(),
-        end: now.clone().endOf('day').toDate()
+        startKey: now.clone().startOf('isoWeek').format('YYYY-MM-DD'),
+        endKey: now.clone().format('YYYY-MM-DD')
       };
     }
 
     if (timePeriod === 'monthly' || timePeriod === 'month') {
       return {
-        start: now.clone().startOf('month').toDate(),
-        end: now.clone().endOf('day').toDate()
+        startKey: now.clone().startOf('month').format('YYYY-MM-DD'),
+        endKey: now.clone().format('YYYY-MM-DD')
       };
     }
 
     return {
-      start: now.clone().startOf('day').toDate(),
-      end: now.clone().endOf('day').toDate()
+      startKey: now.clone().format('YYYY-MM-DD'),
+      endKey: now.clone().format('YYYY-MM-DD')
     };
   }
 
-  /**
-   * Build location-aware Mongo match stage
-   */
   static buildMatchStage(level, userLocation, dateRange) {
     const matchStage = {
-      date: {
-        $gte: dateRange.start,
-        $lte: dateRange.end
+      dateKey: {
+        $gte: dateRange.startKey,
+        $lte: dateRange.endKey
       }
     };
 
@@ -171,56 +189,82 @@ class LeaderboardService {
     return matchStage;
   }
 
-  /**
-   * Get Redis cache key (for future integration)
-   */
-  static getCacheKey(level, userLocation, timePeriod) {
-    const locationKey = this.getLocationKey(level, userLocation);
-    return `leaderboard:${level}:${locationKey}:${timePeriod}`;
+  static toLeaderboardEntry(aggregate, index) {
+    const totalDistance = aggregate.totalDistance || 0;
+    const totalDuration = aggregate.totalDuration || 0;
+    const avgSpeed = totalDuration > 0 ? totalDistance / (totalDuration / 3600) : 0;
+    const averagePace = totalDistance > 0 ? (totalDuration / 60) / totalDistance : 0;
+
+    return {
+      rank: index + 1,
+      userId: aggregate.user._id,
+      name: aggregate.user.name,
+      avatar: aggregate.user.avatar || null,
+      totalDistance: Math.round(totalDistance * 100) / 100,
+      totalDuration,
+      totalRuns: aggregate.totalRuns,
+      avgSpeed: Math.round(avgSpeed * 100) / 100,
+      averagePace: Math.round(averagePace * 100) / 100,
+      caloriesBurned: Math.round((aggregate.caloriesBurned || 0) * 100) / 100,
+      elevationGain: Math.round((aggregate.elevationGain || 0) * 100) / 100,
+      streak: aggregate.user.streak || 0,
+      lastRunAt: aggregate.lastRunAt,
+      location: {
+        city: aggregate.user.location?.city || null,
+        district: aggregate.user.location?.district || null,
+        state: aggregate.user.location?.state || null,
+        country: aggregate.user.location?.country || null
+      }
+    };
   }
 
-  /**
-   * Get location key for caching
-   */
+  static validateLevel(level) {
+    if (!VALID_LEVELS.has(level)) {
+      throw ApiError.badRequest('Invalid leaderboard level');
+    }
+    return level;
+  }
+
+  static validateTimePeriod(timePeriod) {
+    if (!VALID_PERIODS.has(timePeriod)) {
+      throw ApiError.badRequest('Invalid timePeriod. Use today, weekly, or monthly.');
+    }
+    return timePeriod;
+  }
+
+  static validateLimit(limit) {
+    return Math.min(Math.max(parseInt(limit, 10) || 100, 1), 100);
+  }
+
+  static getCacheKey(level, userLocation, timePeriod, limit, dateRange) {
+    return [
+      'leaderboard',
+      level,
+      this.getLocationKey(level, userLocation),
+      timePeriod,
+      limit,
+      dateRange.startKey,
+      dateRange.endKey
+    ].join(':');
+  }
+
   static getLocationKey(level, userLocation) {
     if (level === 'local') {
       return `${userLocation.latitude || 'na'}:${userLocation.longitude || 'na'}`;
-    } else if (level === 'city') {
+    }
+    if (level === 'city') {
       return userLocation.city || 'unknown';
-    } else if (level === 'district') {
+    }
+    if (level === 'district') {
       return userLocation.district || 'unknown';
-    } else if (level === 'state') {
+    }
+    if (level === 'state') {
       return userLocation.state || 'unknown';
-    } else if (level === 'country') {
-      return userLocation.country || 'other';
+    }
+    if (level === 'country') {
+      return userLocation.country || 'worldwide';
     }
     return 'unknown';
-  }
-
-  /**
-   * Calculate streak for a user with IST timezone
-   */
-  static calculateUserStreak(lastRunDate, timezone = 'Asia/Kolkata') {
-    if (!lastRunDate) {
-      return 0;
-    }
-
-    const tz = timezone || 'Asia/Kolkata';
-    const today = moment.tz(tz).startOf('day');
-    const lastRun = moment.tz(lastRunDate, tz);
-
-    const daysDiff = today.diff(lastRun, 'days');
-
-    if (daysDiff === 0) {
-      // Ran today
-      return 1;
-    } else if (daysDiff === 1) {
-      // Ran yesterday
-      return 1; // Actual streak value should come from User model
-    } else {
-      // Streak broken
-      return 0;
-    }
   }
 }
 

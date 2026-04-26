@@ -1,10 +1,19 @@
 const Post = require('../models/Post');
+const Run = require('../models/Run');
+const ApiError = require('../utils/ApiError');
 
 class CommunityService {
   /**
    * Create a new community post
    */
   static async createPost(userId, { text, runId }) {
+    if (runId) {
+      const run = await Run.findOne({ _id: runId, userId });
+      if (!run) {
+        throw ApiError.forbidden('You can only attach your own runs to a post');
+      }
+    }
+
     const post = new Post({
       userId,
       text,
@@ -54,9 +63,9 @@ class CommunityService {
    */
   static async toggleLike(postId, userId) {
     const post = await Post.findById(postId);
-    if (!post) throw new Error('Post not found');
+    if (!post) throw ApiError.notFound('Post not found');
 
-    const likeIndex = post.likes.indexOf(userId);
+    const likeIndex = post.likes.findIndex((likeUserId) => likeUserId.toString() === userId.toString());
     if (likeIndex === -1) {
       post.likes.push(userId);
     } else {
@@ -72,7 +81,7 @@ class CommunityService {
    */
   static async addComment(postId, userId, text) {
     const post = await Post.findById(postId);
-    if (!post) throw new Error('Post not found');
+    if (!post) throw ApiError.notFound('Post not found');
 
     post.comments.push({ userId, text });
     await post.save();

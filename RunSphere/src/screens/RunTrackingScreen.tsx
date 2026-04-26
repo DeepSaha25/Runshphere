@@ -29,14 +29,14 @@ const RunTrackingScreen = ({navigation}: any) => {
   const resumeRun = useRunStore(state => state.resumeRun);
   const prepareSummary = useRunStore(state => state.prepareSummary);
   const resetRun = useRunStore(state => state.resetRun);
-  const watchIdRef = useRef<number | null>(null);
+  const watchRef = useRef<ReturnType<typeof startLocationWatch> | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [initializing, setInitializing] = useState(true);
   const [locationStatus, setLocationStatus] = useState('Acquiring GPS lock...');
 
   const clearTrackingArtifacts = useCallback(() => {
-    stopLocationWatch(watchIdRef.current);
-    watchIdRef.current = null;
+    stopLocationWatch(watchRef.current);
+    watchRef.current = null;
 
     if (timerRef.current) {
       clearInterval(timerRef.current);
@@ -70,6 +70,18 @@ const RunTrackingScreen = ({navigation}: any) => {
           typeof position.coords.altitude === 'number'
             ? position.coords.altitude
             : null,
+        accuracy:
+          typeof position.coords.accuracy === 'number'
+            ? position.coords.accuracy
+            : null,
+        speed:
+          typeof position.coords.speed === 'number'
+            ? position.coords.speed
+            : null,
+        heading:
+          typeof position.coords.heading === 'number'
+            ? position.coords.heading
+            : null,
         timestamp: new Date(position.timestamp || Date.now()).toISOString(),
       };
 
@@ -93,7 +105,10 @@ const RunTrackingScreen = ({navigation}: any) => {
     let active = true;
 
     const bootstrap = async () => {
-      resetRun();
+      const currentRun = useRunStore.getState();
+      if (currentRun.status === 'idle' || currentRun.status === 'summary') {
+        resetRun();
+      }
 
       try {
         const granted = await requestLocationPermission();
@@ -153,8 +168,8 @@ const RunTrackingScreen = ({navigation}: any) => {
       }, 1000);
     }
 
-    if (watchIdRef.current === null) {
-      watchIdRef.current = startLocationWatch(
+    if (watchRef.current === null) {
+      watchRef.current = startLocationWatch(
         position => {
           ingestPosition(position);
         },
@@ -213,6 +228,7 @@ const RunTrackingScreen = ({navigation}: any) => {
       distanceKm={distanceKm}
       elevationGain={elevationGain}
       calories={estimateCalories(distanceKm, profile?.weightKg)}
+      gpsStatus={locationStatus}
       status={initializing ? 'idle' : status}
       onPauseResume={pauseOrResume}
       onFinish={finishRun}

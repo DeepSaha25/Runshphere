@@ -9,7 +9,11 @@ import LoginScreen from '../screens/LoginScreen';
 import SignupScreen from '../screens/SignupScreen';
 import RunTrackingScreen from '../screens/RunTrackingScreen';
 import RunSummaryScreen from '../screens/RunSummaryScreen';
+import ApiClient from '../services/apiClient';
 import {useAuthStore} from '../store/authStore';
+import {useLeaderboardStore} from '../store/leaderboardStore';
+import {useRunStore} from '../store/runStore';
+import {useUserStore} from '../store/userStore';
 import {Colors} from '../theme/colors';
 import BottomTabNavigator from './BottomTabNavigator';
 import {RootStackParamList} from './types';
@@ -34,8 +38,23 @@ const AppNavigator = () => {
   const bootstrap = useAuthStore(state => state.bootstrap);
 
   useEffect(() => {
+    ApiClient.setUnauthorizedHandler(async () => {
+      await useAuthStore.getState().logout();
+    });
     bootstrap();
+
+    return () => {
+      ApiClient.setUnauthorizedHandler(null);
+    };
   }, [bootstrap]);
+
+  useEffect(() => {
+    if (hydrated && !user) {
+      useUserStore.getState().reset();
+      useLeaderboardStore.getState().reset();
+      useRunStore.getState().resetRun();
+    }
+  }, [hydrated, user]);
 
   if (!hydrated) {
     return (

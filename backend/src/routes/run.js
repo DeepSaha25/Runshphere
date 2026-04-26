@@ -1,6 +1,7 @@
 const express = require('express');
 const authenticate = require('../middlewares/auth');
 const { validateRunSubmission } = require('../middlewares/validators');
+const { writeLimiter } = require('../middlewares/rateLimits');
 const {
   submitRun,
   getHistory,
@@ -18,7 +19,7 @@ router.use(authenticate);
  * POST /api/run/add
  * Submit a new run
  */
-router.post('/add', validateRunSubmission, submitRun);
+router.post('/add', writeLimiter, validateRunSubmission, submitRun);
 
 /**
  * GET /api/run/history

@@ -7,6 +7,11 @@ const RunSchema = new mongoose.Schema(
       ref: 'User',
       required: [true, 'User ID is required']
     },
+    clientRunId: {
+      type: String,
+      required: [true, 'Client run ID is required'],
+      trim: true
+    },
     distance: {
       type: Number,
       required: [true, 'Distance is required'],
@@ -31,12 +36,48 @@ const RunSchema = new mongoose.Schema(
           type: Number,
           default: null
         },
+        accuracy: {
+          type: Number,
+          default: null
+        },
+        speed: {
+          type: Number,
+          default: null
+        },
+        heading: {
+          type: Number,
+          default: null
+        },
         timestamp: {
           type: Date,
           default: Date.now
         }
       }
     ],
+    route: [
+      {
+        latitude: {
+          type: Number,
+          required: true
+        },
+        longitude: {
+          type: Number,
+          required: true
+        },
+        timestamp: {
+          type: Date,
+          default: Date.now
+        }
+      }
+    ],
+    startTime: {
+      type: Date,
+      required: [true, 'Start time is required']
+    },
+    endTime: {
+      type: Date,
+      required: [true, 'End time is required']
+    },
     date: {
       type: Date,
       required: [true, 'Run date is required'],
@@ -99,20 +140,14 @@ const RunSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Calculate average speed before saving (validation for anti-cheat)
+// Derive pace fields from trusted service-calculated metrics.
 RunSchema.pre('save', function (next) {
   if (this.duration && this.duration > 0) {
-    // Calculate average speed in km/h
     const speedKmh = (this.distance / (this.duration / 3600));
     this.avgSpeed = Math.round(speedKmh * 100) / 100;
     this.averagePace = this.distance > 0
       ? Math.round(((this.duration / 60) / this.distance) * 100) / 100
       : 0;
-
-    // Anti-cheat: Reject if speed > 25 km/h
-    if (speedKmh > 25) {
-      return next(new Error(`Invalid run: Average speed (${speedKmh.toFixed(2)} km/h) exceeds 25 km/h limit`));
-    }
   }
   next();
 });
@@ -127,6 +162,10 @@ RunSchema.pre('save', function (next) {
 
 // Index for faster queries
 RunSchema.index({ userId: 1, date: -1 });
+RunSchema.index(
+  { userId: 1, clientRunId: 1 },
+  { unique: true, partialFilterExpression: { clientRunId: { $type: 'string' } } }
+);
 RunSchema.index({ date: -1 });
 RunSchema.index({ createdAt: -1 });
 RunSchema.index({ 'location.point': '2dsphere' });

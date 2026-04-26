@@ -14,6 +14,7 @@ interface UserState {
   isLoading: boolean;
   refreshDashboard: (historyLimit?: number) => Promise<void>;
   updateBackendLocation: (latitude: number, longitude: number) => Promise<any>;
+  reset: () => void;
 }
 
 const emptyStats = {
@@ -158,6 +159,15 @@ export const useUserStore = create<UserState>()(
         await useAuthStore.getState().setUser(response.data);
         return response.data;
       },
+      reset: () =>
+        set({
+          profile: null,
+          stats: emptyStats,
+          dailyStats: emptyPeriodStats,
+          weeklyStats: emptyPeriodStats,
+          recentRuns: [],
+          isLoading: false,
+        }),
     }),
     {name: 'runsphere-user-store'},
   ),

@@ -33,6 +33,7 @@ const RunSummaryScreen = ({navigation}: any) => {
   const loadLeaderboard = useLeaderboardStore(state => state.loadLeaderboard);
   const resetRun = useRunStore(state => state.resetRun);
   const coordinates = useRunStore(state => state.coordinates);
+  const clientRunId = useRunStore(state => state.clientRunId);
   const distanceKm = useRunStore(state => state.distanceKm);
   const elapsedSeconds = useRunStore(state => state.elapsedSeconds);
   const elevationGain = useRunStore(state => state.elevationGain);
@@ -73,12 +74,8 @@ const RunSummaryScreen = ({navigation}: any) => {
     try {
       if (!isGuestUser(authUser)) {
         await RunService.submitRun({
-          distance: Number(summary.distanceKm.toFixed(2)),
-          duration: summary.elapsedSeconds,
+          clientRunId: clientRunId || `manual-${Date.now()}`,
           coordinates,
-          elevationGain: summary.elevationGain,
-          caloriesBurned: summary.caloriesBurned,
-          date: summary.finishedAt,
         });
       }
 

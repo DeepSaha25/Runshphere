@@ -1,4 +1,4 @@
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useMemo, useState} from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -100,14 +100,6 @@ const ProfileScreen = () => {
     }
   };
 
-  if (isLoading && !profile) {
-    return (
-      <View style={styles.loadingState}>
-        <ActivityIndicator size="large" color={Colors.primaryContainer} />
-      </View>
-    );
-  }
-
   const totalDistance = Number(stats?.totalDistance || profile?.totalDistance || 0);
   const totalRuns = Number(stats?.totalRuns || 0);
   const weeklyDistance = Number(weeklyStats?.totalDistance || 0);
@@ -118,8 +110,37 @@ const ProfileScreen = () => {
     }
     return best;
   }, 0);
-  const weeklyBars = [8.2, 12.4, 5.1, 21.0, 10.2, 15.5, 2.0];
-  const maxBar = Math.max(...weeklyBars);
+  const weeklyBars = useMemo(() => {
+    const bars = Array(7).fill(0);
+    const today = new Date();
+    const start = new Date(today);
+    start.setDate(today.getDate() - 6);
+    start.setHours(0, 0, 0, 0);
+
+    recentRuns.forEach(run => {
+      const runDate = new Date(run.date);
+      if (Number.isNaN(runDate.getTime()) || runDate < start) {
+        return;
+      }
+
+      const index = Math.min(
+        6,
+        Math.max(0, Math.floor((runDate.getTime() - start.getTime()) / 86400000)),
+      );
+      bars[index] += Number(run.distance || 0);
+    });
+
+    return bars;
+  }, [recentRuns]);
+  const maxBar = Math.max(1, ...weeklyBars);
+
+  if (isLoading && !profile) {
+    return (
+      <View style={styles.loadingState}>
+        <ActivityIndicator size="large" color={Colors.primaryContainer} />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>

@@ -22,6 +22,7 @@ interface LeaderboardState {
   ) => Promise<void>;
   getEntries: (scope: LeaderboardLevel, period: TimePeriod) => any[];
   getRank: (scope: LeaderboardLevel, period: TimePeriod) => number | null;
+  reset: () => void;
 }
 
 const getKey = (scope: LeaderboardLevel, period: TimePeriod) =>
@@ -144,6 +145,13 @@ export const useLeaderboardStore = create<LeaderboardState>()(
       },
       getEntries: (scope, period) => get().entries[getKey(scope, period)] || [],
       getRank: (scope, period) => get().ranks[getKey(scope, period)] ?? null,
+      reset: () =>
+        set({
+          entries: {},
+          ranks: {},
+          loading: {},
+          errors: {},
+        }),
     }),
     {name: 'runsphere-leaderboard-store'},
   ),

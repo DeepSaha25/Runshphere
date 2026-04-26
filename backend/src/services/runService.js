@@ -1,49 +1,52 @@
 const Run = require('../models/Run');
 const User = require('../models/User');
+const DailyAggregate = require('../models/DailyAggregate');
 const moment = require('moment-timezone');
 const mongoose = require('mongoose');
 const { getLocationFromCoordinates } = require('../utils/geocoding');
+const ApiError = require('../utils/ApiError');
+
+const MIN_RUN_DISTANCE_KM = 0.2;
+const MIN_RUN_DURATION_SECONDS = 60;
+const MAX_AVERAGE_SPEED_KMH = 25;
+const MAX_SEGMENT_SPEED_KMH = 30;
+const MAX_ACCEPTED_ACCURACY_METERS = 80;
+const MAX_FUTURE_SKEW_MS = 2 * 60 * 1000;
+const MAX_BACKDATE_DAYS = 7;
+const JITTER_DISTANCE_METERS = 3;
+const ROUTE_SIMPLIFY_DISTANCE_METERS = 20;
+const EARTH_RADIUS_METERS = 6371e3;
 
 class RunService {
-  /**
-   * Submit a new run and update user stats
-   */
-  static async submitRun(userId, { distance, duration, coordinates, date, elevationGain, caloriesBurned }) {
-    // Validate run data
-    const validationErrors = Run.validateRunData(distance, duration);
-    if (validationErrors.length > 0) {
-      throw new Error(validationErrors.join(', '));
-    }
-
+  static async submitRun(userId, { clientRunId, coordinates }) {
     const user = await User.findById(userId);
     if (!user) {
-      throw new Error('User not found');
+      throw ApiError.notFound('User not found');
+    }
+
+    const existingRun = await Run.findOne({ userId, clientRunId });
+    if (existingRun) {
+      return { run: existingRun, created: false };
     }
 
     const normalizedCoordinates = this.normalizeCoordinates(coordinates);
-    if (normalizedCoordinates.length === 0) {
-      throw new Error('At least one valid coordinate is required');
-    }
-
-    const lastCoordinate = normalizedCoordinates[normalizedCoordinates.length - 1];
+    const trustedMetrics = this.calculateTrustedMetrics(normalizedCoordinates);
+    const lastCoordinate = trustedMetrics.coordinates[trustedMetrics.coordinates.length - 1];
     const locationData = await getLocationFromCoordinates(lastCoordinate.latitude, lastCoordinate.longitude);
-    const derivedElevationGain = Number.isFinite(elevationGain)
-      ? Number(elevationGain)
-      : this.calculateElevationGain(normalizedCoordinates);
-    const derivedCalories = Number.isFinite(caloriesBurned)
-      ? Number(caloriesBurned)
-      : this.calculateCalories(distance, user.weightKg);
-    const runDate = date ? new Date(date) : new Date();
+    const caloriesBurned = this.calculateCalories(trustedMetrics.distanceKm, user.weightKg);
 
-    // Create run
     const run = new Run({
       userId,
-      distance,
-      duration,
-      coordinates: normalizedCoordinates,
-      date: runDate,
-      elevationGain: derivedElevationGain,
-      caloriesBurned: derivedCalories,
+      clientRunId,
+      distance: trustedMetrics.distanceKm,
+      duration: trustedMetrics.durationSeconds,
+      coordinates: trustedMetrics.coordinates,
+      route: this.simplifyRoute(trustedMetrics.coordinates),
+      startTime: trustedMetrics.startTime,
+      endTime: trustedMetrics.endTime,
+      date: trustedMetrics.endTime,
+      elevationGain: trustedMetrics.elevationGain,
+      caloriesBurned,
       location: {
         latitude: locationData.latitude,
         longitude: locationData.longitude,
@@ -58,7 +61,17 @@ class RunService {
       }
     });
 
-    await run.save();
+    try {
+      await run.save();
+    } catch (error) {
+      if (error.code === 11000) {
+        const duplicate = await Run.findOne({ userId, clientRunId });
+        if (duplicate) {
+          return { run: duplicate, created: false };
+        }
+      }
+      throw error;
+    }
 
     await User.findByIdAndUpdate(userId, {
       'location.latitude': locationData.latitude,
@@ -71,19 +84,16 @@ class RunService {
       'location.point.coordinates': [locationData.longitude, locationData.latitude]
     });
 
-    // Update user total distance and streak
-    await this.updateUserStats(userId, runDate);
+    await this.upsertDailyAggregate(user, run);
+    await this.updateUserStats(userId, run.endTime);
 
-    return run;
+    return { run, created: true };
   }
 
-  /**
-   * Update user total distance and streak
-   */
   static async updateUserStats(userId, runDate = new Date()) {
     const user = await User.findById(userId);
     if (!user) {
-      throw new Error('User not found');
+      throw ApiError.notFound('User not found');
     }
 
     const tz = user.timezone || 'Asia/Kolkata';
@@ -105,10 +115,8 @@ class RunService {
     return user;
   }
 
-  /**
-   * Get user run history
-   */
   static async getUserRunHistory(userId, limit = 50, startDate = null, endDate = null) {
+    const safeLimit = Math.min(Math.max(parseInt(limit, 10) || 50, 1), 100);
     const query = { userId };
 
     if (startDate || endDate) {
@@ -121,14 +129,9 @@ class RunService {
       }
     }
 
-    const runs = await Run.find(query).sort({ date: -1 }).limit(limit);
-
-    return runs;
+    return Run.find(query).sort({ date: -1 }).limit(safeLimit);
   }
 
-  /**
-   * Get user stats with aggregation
-   */
   static async getUserAggregatedStats(userId) {
     const totalRunsStats = await Run.aggregate([
       { $match: { userId: new mongoose.Types.ObjectId(userId) } },
@@ -147,23 +150,12 @@ class RunService {
     ]);
 
     if (totalRunsStats.length === 0) {
-      return {
-        totalDistance: 0,
-        totalDuration: 0,
-        totalRuns: 0,
-        avgSpeed: 0,
-        averagePace: 0,
-        caloriesBurned: 0,
-        elevationGain: 0
-      };
+      return this.emptyTotalStats();
     }
 
     return totalRunsStats[0];
   }
 
-  /**
-   * Get weekly stats
-   */
   static async getWeeklyStats(userId) {
     const weekAgo = new Date();
     weekAgo.setDate(weekAgo.getDate() - 7);
@@ -186,21 +178,9 @@ class RunService {
       }
     ]);
 
-    if (weeklyStats.length === 0) {
-      return {
-        totalDistance: 0,
-        totalRuns: 0,
-        avgSpeed: 0,
-        averagePace: 0
-      };
-    }
-
-    return weeklyStats[0];
+    return weeklyStats[0] || this.emptyPeriodStats();
   }
 
-  /**
-   * Get daily stats
-   */
   static async getDailyStats(userId, date = new Date()) {
     const dayStart = new Date(date);
     dayStart.setHours(0, 0, 0, 0);
@@ -225,16 +205,7 @@ class RunService {
       }
     ]);
 
-    if (dailyStats.length === 0) {
-      return {
-        totalDistance: 0,
-        totalRuns: 0,
-        avgSpeed: 0,
-        averagePace: 0
-      };
-    }
-
-    return dailyStats[0];
+    return dailyStats[0] || this.emptyPeriodStats();
   }
 
   static normalizeCoordinates(coordinates = []) {
@@ -245,9 +216,196 @@ class RunService {
         altitude: coordinate.altitude === undefined || coordinate.altitude === null
           ? null
           : Number(coordinate.altitude),
-        timestamp: coordinate.timestamp ? new Date(coordinate.timestamp) : new Date()
+        accuracy: coordinate.accuracy === undefined || coordinate.accuracy === null
+          ? null
+          : Number(coordinate.accuracy),
+        speed: coordinate.speed === undefined || coordinate.speed === null
+          ? null
+          : Number(coordinate.speed),
+        heading: coordinate.heading === undefined || coordinate.heading === null
+          ? null
+          : Number(coordinate.heading),
+        timestamp: coordinate.timestamp ? new Date(coordinate.timestamp) : null
       }))
-      .filter((coordinate) => Number.isFinite(coordinate.latitude) && Number.isFinite(coordinate.longitude));
+      .filter((coordinate) =>
+        Number.isFinite(coordinate.latitude) &&
+        Number.isFinite(coordinate.longitude) &&
+        coordinate.timestamp instanceof Date &&
+        !Number.isNaN(coordinate.timestamp.getTime())
+      )
+      .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+  }
+
+  static calculateTrustedMetrics(coordinates) {
+    if (coordinates.length < 2) {
+      throw ApiError.badRequest('At least two valid GPS samples are required');
+    }
+
+    const now = Date.now();
+    const firstTime = coordinates[0].timestamp.getTime();
+    const lastTime = coordinates[coordinates.length - 1].timestamp.getTime();
+
+    if (firstTime < moment().subtract(MAX_BACKDATE_DAYS, 'days').valueOf()) {
+      throw ApiError.badRequest(`Runs older than ${MAX_BACKDATE_DAYS} days cannot be submitted`);
+    }
+
+    if (lastTime > now + MAX_FUTURE_SKEW_MS) {
+      throw ApiError.badRequest('Run timestamps cannot be in the future');
+    }
+
+    const usableCoordinates = coordinates.filter((coordinate) =>
+      coordinate.accuracy === null ||
+      (Number.isFinite(coordinate.accuracy) && coordinate.accuracy <= MAX_ACCEPTED_ACCURACY_METERS)
+    );
+
+    if (usableCoordinates.length < 2) {
+      throw ApiError.badRequest('GPS accuracy is too low to save this run');
+    }
+
+    const duplicateTimestamps = new Set();
+    for (const coordinate of usableCoordinates) {
+      const key = coordinate.timestamp.toISOString();
+      if (duplicateTimestamps.has(key)) {
+        throw ApiError.badRequest('Duplicate GPS timestamps detected');
+      }
+      duplicateTimestamps.add(key);
+    }
+
+    let totalMeters = 0;
+    let elevationGain = 0;
+    const acceptedCoordinates = [usableCoordinates[0]];
+
+    for (let index = 1; index < usableCoordinates.length; index += 1) {
+      const previous = acceptedCoordinates[acceptedCoordinates.length - 1];
+      const current = usableCoordinates[index];
+      const deltaSeconds = (current.timestamp.getTime() - previous.timestamp.getTime()) / 1000;
+
+      if (deltaSeconds <= 0) {
+        throw ApiError.badRequest('GPS timestamps must be strictly increasing');
+      }
+
+      const segmentMeters = this.haversineMeters(previous, current);
+      if (segmentMeters < JITTER_DISTANCE_METERS) {
+        continue;
+      }
+
+      const segmentSpeedKmh = (segmentMeters / 1000) / (deltaSeconds / 3600);
+      if (segmentSpeedKmh > MAX_SEGMENT_SPEED_KMH) {
+        throw ApiError.badRequest(`GPS jump detected (${segmentSpeedKmh.toFixed(2)} km/h segment)`);
+      }
+
+      if (
+        Number.isFinite(previous.altitude) &&
+        Number.isFinite(current.altitude) &&
+        current.altitude > previous.altitude
+      ) {
+        elevationGain += current.altitude - previous.altitude;
+      }
+
+      totalMeters += segmentMeters;
+      acceptedCoordinates.push(current);
+    }
+
+    if (acceptedCoordinates.length < 2) {
+      throw ApiError.badRequest('Not enough movement after GPS drift filtering');
+    }
+
+    const startTime = acceptedCoordinates[0].timestamp;
+    const endTime = acceptedCoordinates[acceptedCoordinates.length - 1].timestamp;
+    const durationSeconds = Math.round((endTime.getTime() - startTime.getTime()) / 1000);
+    const distanceKm = Math.round((totalMeters / 1000) * 100) / 100;
+
+    if (durationSeconds < MIN_RUN_DURATION_SECONDS) {
+      throw ApiError.badRequest(`Run duration must be at least ${MIN_RUN_DURATION_SECONDS} seconds`);
+    }
+
+    if (distanceKm < MIN_RUN_DISTANCE_KM) {
+      throw ApiError.badRequest(`Run distance must be at least ${MIN_RUN_DISTANCE_KM} km`);
+    }
+
+    const avgSpeed = distanceKm / (durationSeconds / 3600);
+    if (avgSpeed > MAX_AVERAGE_SPEED_KMH) {
+      throw ApiError.badRequest(`Average speed (${avgSpeed.toFixed(2)} km/h) exceeds ${MAX_AVERAGE_SPEED_KMH} km/h limit`);
+    }
+
+    return {
+      coordinates: acceptedCoordinates,
+      distanceKm,
+      durationSeconds,
+      elevationGain: Math.round(elevationGain * 100) / 100,
+      startTime,
+      endTime
+    };
+  }
+
+  static simplifyRoute(coordinates) {
+    if (coordinates.length <= 2) {
+      return coordinates.map(this.toRoutePoint);
+    }
+
+    const simplified = [coordinates[0]];
+    let lastAccepted = coordinates[0];
+
+    for (let index = 1; index < coordinates.length - 1; index += 1) {
+      if (this.haversineMeters(lastAccepted, coordinates[index]) >= ROUTE_SIMPLIFY_DISTANCE_METERS) {
+        simplified.push(coordinates[index]);
+        lastAccepted = coordinates[index];
+      }
+    }
+
+    simplified.push(coordinates[coordinates.length - 1]);
+    return simplified.map(this.toRoutePoint);
+  }
+
+  static toRoutePoint(coordinate) {
+    return {
+      latitude: coordinate.latitude,
+      longitude: coordinate.longitude,
+      timestamp: coordinate.timestamp
+    };
+  }
+
+  static async upsertDailyAggregate(user, run) {
+    const timezone = user.timezone || 'Asia/Kolkata';
+    const runEndTime = run.endTime || run.date || run.createdAt || new Date();
+    const dateKey = moment.tz(runEndTime, timezone).format('YYYY-MM-DD');
+    const locationKey = this.getLocationKey(run.location);
+
+    await DailyAggregate.updateOne(
+      {
+        userId: run.userId,
+        dateKey,
+        locationKey
+      },
+      {
+        $setOnInsert: {
+          userId: run.userId,
+          dateKey,
+          locationKey,
+          location: run.location
+        },
+        $inc: {
+          totalDistance: run.distance,
+          totalDuration: run.duration,
+          totalRuns: 1,
+          caloriesBurned: run.caloriesBurned,
+          elevationGain: run.elevationGain
+        },
+        $max: {
+          lastRunAt: runEndTime
+        }
+      },
+      { upsert: true }
+    );
+  }
+
+  static getLocationKey(location = {}) {
+    return [
+      location.country || 'unknown',
+      location.state || 'unknown',
+      location.district || 'unknown',
+      location.city || 'unknown'
+    ].join('|');
   }
 
   static calculateCalories(distance, weightKg) {
@@ -255,19 +413,25 @@ class RunService {
     return Math.round(distance * effectiveWeight * 1.036 * 100) / 100;
   }
 
-  static calculateElevationGain(coordinates = []) {
-    let gain = 0;
+  static haversineMeters(from, to) {
+    const phi1 = this.toRadians(from.latitude);
+    const phi2 = this.toRadians(to.latitude);
+    const deltaPhi = this.toRadians(to.latitude - from.latitude);
+    const deltaLambda = this.toRadians(to.longitude - from.longitude);
 
-    for (let index = 1; index < coordinates.length; index += 1) {
-      const previous = coordinates[index - 1].altitude;
-      const current = coordinates[index].altitude;
+    const a =
+      Math.sin(deltaPhi / 2) * Math.sin(deltaPhi / 2) +
+      Math.cos(phi1) *
+        Math.cos(phi2) *
+        Math.sin(deltaLambda / 2) *
+        Math.sin(deltaLambda / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-      if (Number.isFinite(previous) && Number.isFinite(current) && current > previous) {
-        gain += current - previous;
-      }
-    }
+    return EARTH_RADIUS_METERS * c;
+  }
 
-    return Math.round(gain * 100) / 100;
+  static toRadians(value) {
+    return (value * Math.PI) / 180;
   }
 
   static async calculateCurrentStreak(userId, timezone = 'Asia/Kolkata') {
@@ -315,6 +479,27 @@ class RunService {
     }
 
     return streak;
+  }
+
+  static emptyTotalStats() {
+    return {
+      totalDistance: 0,
+      totalDuration: 0,
+      totalRuns: 0,
+      avgSpeed: 0,
+      averagePace: 0,
+      caloriesBurned: 0,
+      elevationGain: 0
+    };
+  }
+
+  static emptyPeriodStats() {
+    return {
+      totalDistance: 0,
+      totalRuns: 0,
+      avgSpeed: 0,
+      averagePace: 0
+    };
   }
 }
 

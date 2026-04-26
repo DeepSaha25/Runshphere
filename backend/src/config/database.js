@@ -1,30 +1,22 @@
 const mongoose = require('mongoose');
-require('dotenv').config();
-
-const DATABASE_URL = process.env.DATABASE_URL;
-
-if (!DATABASE_URL) {
-  console.error('❌ DATABASE_URL not set in environment variables');
-  process.exit(1);
-}
+const config = require('./env');
 
 mongoose
-  .connect(DATABASE_URL)
+  .connect(config.DATABASE_URL)
   .then(() => {
-    console.log('✅ MongoDB connected successfully');
+    console.log('[RunSphere] MongoDB connected successfully');
   })
   .catch((err) => {
-    console.error('❌ MongoDB connection failed:', err.message);
+    console.error('[RunSphere] MongoDB connection failed:', err.message);
     process.exit(1);
   });
 
-// Handle connection events
 mongoose.connection.on('disconnected', () => {
-  console.warn('⚠️ MongoDB disconnected');
+  console.warn('[RunSphere] MongoDB disconnected');
 });
 
 mongoose.connection.on('error', (err) => {
-  console.error('❌ MongoDB error:', err.message);
+  console.error('[RunSphere] MongoDB error:', err.message);
 });
 
 module.exports = mongoose.connection;

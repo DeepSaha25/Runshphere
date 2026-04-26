@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
-require('dotenv').config();
+const helmet = require('helmet');
+const config = require('./src/config/env');
 require('./src/config/database');
 
 // ==================== MIDDLEWARE & UTILITIES ====================
@@ -15,12 +16,22 @@ const app = express();
 // Request logging
 app.use(logger);
 
-// Allow cross-origin requests
-app.use(cors());
+// Security headers and explicit cross-origin policy.
+app.use(helmet());
+app.use(cors({
+  credentials: true,
+  origin: (origin, callback) => {
+    if (!origin || config.CORS_ORIGINS.length === 0 || config.CORS_ORIGINS.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error('CORS origin not allowed'));
+  }
+}));
 
 // Parse JSON and URL-encoded bodies
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ limit: '10mb', extended: true }));
+app.use(express.json({ limit: '2mb' }));
+app.use(express.urlencoded({ limit: '2mb', extended: true }));
 
 // ==================== ROUTES ====================
 

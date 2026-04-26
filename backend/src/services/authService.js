@@ -1,21 +1,25 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
+const config = require('../config/env');
+const ApiError = require('../utils/ApiError');
 
 class AuthService {
   /**
    * Register a new user
    */
   static async register({ name, email, password }) {
+    const normalizedEmail = email.trim().toLowerCase();
+
     // Check if user already exists
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: normalizedEmail });
     if (existingUser) {
-      throw new Error('Email already registered');
+      throw ApiError.conflict('Email already registered');
     }
 
     // Create new user
     const user = new User({
       name,
-      email,
+      email: normalizedEmail,
       password
     });
 
@@ -29,19 +33,19 @@ class AuthService {
   static async login({ email, password }) {
     // Validate input
     if (!email || !password) {
-      throw new Error('Email and password are required');
+      throw ApiError.badRequest('Email and password are required');
     }
 
     // Find user (include password field for comparison)
-    const user = await User.findOne({ email }).select('+password');
+    const user = await User.findOne({ email: email.trim().toLowerCase() }).select('+password');
     if (!user) {
-      throw new Error('Invalid email or password');
+      throw ApiError.unauthorized('Invalid email or password');
     }
 
     // Compare password
     const isPasswordValid = await user.comparePassword(password);
     if (!isPasswordValid) {
-      throw new Error('Invalid email or password');
+      throw ApiError.unauthorized('Invalid email or password');
     }
 
     // Generate JWT token
@@ -59,8 +63,8 @@ class AuthService {
   static generateToken(userId) {
     return jwt.sign(
       { userId },
-      process.env.JWT_SECRET || 'your_super_secret_jwt_key',
-      { expiresIn: process.env.JWT_EXPIRE || '7d' }
+      config.JWT_SECRET,
+      { expiresIn: config.JWT_EXPIRE }
     );
   }
 
@@ -69,10 +73,10 @@ class AuthService {
    */
   static verifyToken(token) {
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_super_secret_jwt_key');
+      const decoded = jwt.verify(token, config.JWT_SECRET);
       return decoded;
     } catch (err) {
-      throw new Error('Invalid or expired token');
+      throw ApiError.unauthorized('Invalid or expired token');
     }
   }
 }

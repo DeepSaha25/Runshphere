@@ -1,5 +1,6 @@
 const express = require('express');
 const authenticate = require('../middlewares/auth');
+const { communityLimiter } = require('../middlewares/rateLimits');
 const {
   createPost,
   getFeed,
@@ -11,6 +12,7 @@ const router = express.Router();
 
 // All routes require auth
 router.use(authenticate);
+router.use(communityLimiter);
 
 /**
  * GET /api/community/feed

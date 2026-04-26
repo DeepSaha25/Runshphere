@@ -1,4 +1,6 @@
 const jwt = require('jsonwebtoken');
+const config = require('../config/env');
+const ApiError = require('../utils/ApiError');
 
 /**
  * JWT authentication middleware
@@ -9,23 +11,17 @@ const authenticate = (req, res, next) => {
     // Get token from header
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({
-        status: 'error',
-        message: 'No token provided. Use Bearer token in Authorization header'
-      });
+      return next(ApiError.unauthorized('No token provided. Use Bearer token in Authorization header'));
     }
 
     const token = authHeader.substring(7); // Remove 'Bearer ' prefix
 
     // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_super_secret_jwt_key');
+    const decoded = jwt.verify(token, config.JWT_SECRET);
     req.userId = decoded.userId;
     next();
   } catch (err) {
-    return res.status(401).json({
-      status: 'error',
-      message: 'Invalid or expired token'
-    });
+    return next(ApiError.unauthorized('Invalid or expired token'));
   }
 };
 

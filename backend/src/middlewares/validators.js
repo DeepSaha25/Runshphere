@@ -1,6 +1,11 @@
-/**
- * Request validation middleware
- */
+const ApiError = require('../utils/ApiError');
+
+const failIfInvalid = (errors, next) => {
+  if (errors.length > 0) {
+    return next(ApiError.badRequest('Validation failed', errors));
+  }
+  return next();
+};
 
 const validateSignup = (req, res, next) => {
   const { name, email, password, confirmPassword } = req.body;
@@ -14,23 +19,19 @@ const validateSignup = (req, res, next) => {
     errors.push('Valid email is required');
   }
 
-  if (!password || password.length < 6) {
-    errors.push('Password must be at least 6 characters');
+  if (!password || password.length < 10) {
+    errors.push('Password must be at least 10 characters');
+  } else if (!isStrongPassword(password)) {
+    errors.push('Password must include uppercase, lowercase, number, and symbol characters');
+  } else if (isCommonPassword(password)) {
+    errors.push('Password is too common');
   }
 
   if (password !== confirmPassword) {
     errors.push('Passwords do not match');
   }
 
-  if (errors.length > 0) {
-    return res.status(400).json({
-      status: 'error',
-      message: 'Validation failed',
-      errors
-    });
-  }
-
-  next();
+  return failIfInvalid(errors, next);
 };
 
 const validateLogin = (req, res, next) => {
@@ -45,48 +46,26 @@ const validateLogin = (req, res, next) => {
     errors.push('Password is required');
   }
 
-  if (errors.length > 0) {
-    return res.status(400).json({
-      status: 'error',
-      message: 'Validation failed',
-      errors
-    });
-  }
-
-  next();
+  return failIfInvalid(errors, next);
 };
 
 const validateRunSubmission = (req, res, next) => {
-  const { distance, duration, coordinates } = req.body;
+  const { coordinates, clientRunId } = req.body;
   const errors = [];
 
-  if (distance === undefined || distance === null || distance === '') {
-    errors.push('Distance is required');
-  } else if (isNaN(distance) || Number(distance) < 0.2) {
-    errors.push('Distance must be at least 0.2 km');
+  if (!clientRunId || String(clientRunId).trim().length < 8) {
+    errors.push('clientRunId is required and must be stable for retry safety');
   }
 
-  if (duration === undefined || duration === null || duration === '') {
-    errors.push('Duration is required');
-  } else if (isNaN(duration) || duration <= 0) {
-    errors.push('Duration must be a positive number');
+  if (!Array.isArray(coordinates) || coordinates.length < 2) {
+    errors.push('Coordinates array must include at least two GPS samples');
+  } else if (coordinates.length > 10000) {
+    errors.push('Coordinates array cannot exceed 10000 samples');
+  } else if (!coordinates.every(isValidCoordinateShape)) {
+    errors.push('Each coordinate must include valid latitude, longitude, and timestamp');
   }
 
-  if (!Array.isArray(coordinates) || coordinates.length === 0) {
-    errors.push('Coordinates array is required and must not be empty');
-  } else if (!coordinates.every((coordinate) => coordinate && coordinate.latitude !== undefined && coordinate.longitude !== undefined)) {
-    errors.push('Each coordinate must include latitude and longitude');
-  }
-
-  if (errors.length > 0) {
-    return res.status(400).json({
-      status: 'error',
-      message: 'Validation failed',
-      errors
-    });
-  }
-
-  next();
+  return failIfInvalid(errors, next);
 };
 
 const validateLocationUpdate = (req, res, next) => {
@@ -105,22 +84,51 @@ const validateLocationUpdate = (req, res, next) => {
     errors.push('Longitude must be between -180 and 180');
   }
 
-  if (errors.length > 0) {
-    return res.status(400).json({
-      status: 'error',
-      message: 'Validation failed',
-      errors
-    });
-  }
-
-  next();
+  return failIfInvalid(errors, next);
 };
 
-// ==================== HELPER FUNCTIONS ====================
-
 const isValidEmail = (email) => {
-  const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-  return emailRegex.test(email);
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(String(email || '').trim().toLowerCase());
+};
+
+const isStrongPassword = (password) =>
+  /[a-z]/.test(password) &&
+  /[A-Z]/.test(password) &&
+  /\d/.test(password) &&
+  /[^A-Za-z0-9]/.test(password);
+
+const isCommonPassword = (password) => {
+  const normalized = String(password || '').toLowerCase();
+  return [
+    'password',
+    'password123',
+    'qwerty123',
+    'admin123',
+    'runsphere',
+    '1234567890'
+  ].includes(normalized);
+};
+
+const isValidCoordinateShape = (coordinate) => {
+  if (!coordinate) {
+    return false;
+  }
+
+  const latitude = Number(coordinate.latitude);
+  const longitude = Number(coordinate.longitude);
+  const timestamp = coordinate.timestamp ? new Date(coordinate.timestamp) : null;
+
+  return (
+    Number.isFinite(latitude) &&
+    latitude >= -90 &&
+    latitude <= 90 &&
+    Number.isFinite(longitude) &&
+    longitude >= -180 &&
+    longitude <= 180 &&
+    timestamp instanceof Date &&
+    !Number.isNaN(timestamp.getTime())
+  );
 };
 
 module.exports = {

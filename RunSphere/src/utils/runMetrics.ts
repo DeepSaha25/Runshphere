@@ -4,6 +4,9 @@ export interface RunCoordinate {
   latitude: number;
   longitude: number;
   altitude?: number | null;
+  accuracy?: number | null;
+  speed?: number | null;
+  heading?: number | null;
   timestamp: string;
 }
 
@@ -33,11 +36,31 @@ export const shouldAcceptCoordinate = (
   next: RunCoordinate,
   minDistanceMeters = 5,
 ) => {
+  if (
+    typeof next.accuracy === 'number' &&
+    Number.isFinite(next.accuracy) &&
+    next.accuracy > 80
+  ) {
+    return false;
+  }
+
   if (!previous) {
     return true;
   }
 
-  return haversineMeters(previous, next) >= minDistanceMeters;
+  const distanceMeters = haversineMeters(previous, next);
+  const elapsedSeconds =
+    (new Date(next.timestamp).getTime() - new Date(previous.timestamp).getTime()) /
+    1000;
+
+  if (elapsedSeconds > 0) {
+    const speedKmh = (distanceMeters / 1000) / (elapsedSeconds / 3600);
+    if (speedKmh > 30) {
+      return false;
+    }
+  }
+
+  return distanceMeters >= minDistanceMeters;
 };
 
 export const calculateRouteDistanceKm = (coordinates: RunCoordinate[]) => {

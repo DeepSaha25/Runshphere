@@ -1,37 +1,36 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Keychain from 'react-native-keychain';
+import {API_BASE_URL} from '../config/api';
 import {GUEST_TOKEN} from './guestSession';
 
-const BASE_URL = 'http://10.0.2.2:5000/api'; // Android emulator → host machine
-
-// Token storage keys
 const TOKEN_KEY = '@runsphere_token';
 const USER_KEY = '@runsphere_user';
 
-/**
- * Core HTTP client with JWT injection
- */
 class ApiClient {
   static token: string | null = null;
+  static onUnauthorized: (() => void | Promise<void>) | null = null;
 
   static async init() {
     try {
-      const storedToken = await AsyncStorage.getItem(TOKEN_KEY);
-      if (storedToken) {
-        this.token = storedToken;
-      }
+      const storedToken = await Keychain.getGenericPassword({service: TOKEN_KEY});
+      this.token = storedToken ? storedToken.password : null;
     } catch {}
   }
 
   static async setAuth(token: string, user: any) {
     this.token = token;
-    await AsyncStorage.setItem(TOKEN_KEY, token);
+    await Keychain.setGenericPassword('runsphere', token, {service: TOKEN_KEY});
     await AsyncStorage.setItem(USER_KEY, JSON.stringify(user));
   }
 
   static async clearAuth() {
     this.token = null;
-    await AsyncStorage.removeItem(TOKEN_KEY);
+    await Keychain.resetGenericPassword({service: TOKEN_KEY});
     await AsyncStorage.removeItem(USER_KEY);
+  }
+
+  static setUnauthorizedHandler(handler: (() => void | Promise<void>) | null) {
+    this.onUnauthorized = handler;
   }
 
   static async getStoredUser() {
@@ -58,7 +57,7 @@ class ApiClient {
     endpoint: string,
     body?: any,
   ): Promise<T> {
-    const url = `${BASE_URL}${endpoint}`;
+    const url = `${API_BASE_URL}${endpoint}`;
     const options: RequestInit = {
       method,
       headers: this.getHeaders(),
@@ -74,6 +73,7 @@ class ApiClient {
 
     if (response.status === 401 && this.token !== GUEST_TOKEN) {
       await this.clearAuth();
+      await this.onUnauthorized?.();
     }
 
     if (!response.ok) {
@@ -104,9 +104,6 @@ class ApiClient {
   }
 }
 
-/**
- * Typed API error
- */
 class ApiError extends Error {
   status: number;
   data: any;
@@ -119,5 +116,5 @@ class ApiError extends Error {
   }
 }
 
-export { ApiClient, ApiError, BASE_URL };
+export {ApiClient, ApiError, API_BASE_URL as BASE_URL};
 export default ApiClient;
