@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useCallback} from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
   Image,
 } from 'react-native';
-import {Colors} from '../theme/colors';
+import { Colors } from '../theme/colors';
 import AppHeader from '../components/AppHeader';
 import CommunityService from '../services/communityService';
 
@@ -86,7 +86,8 @@ const CommunityFeedScreen = () => {
             onRefresh={onRefresh}
             tintColor={Colors.primaryContainer}
           />
-        }>
+        }
+      >
         <Text style={styles.kicker}>GLOBAL NETWORK</Text>
         <Text style={styles.title}>COMMUNITY</Text>
 
@@ -108,10 +109,12 @@ const CommunityFeedScreen = () => {
           <View style={styles.emptyState}>
             <Text style={styles.emptyTitle}>No activity yet</Text>
             <Text style={styles.emptyText}>
-              Verified run posts will appear here when your community starts sharing.
+              Verified run posts will appear here when your community starts
+              sharing.
             </Text>
           </View>
-        ) : posts.map((post, index) => (
+        ) : (
+          posts.map((post, index) => (
             <View key={post._id || index} style={styles.feedCard}>
               <View style={styles.visualPanel}>
                 <Image
@@ -137,8 +140,12 @@ const CommunityFeedScreen = () => {
                       </Text>
                     </View>
                     <View>
-                      <Text style={styles.userName}>{post.userId?.name || 'Unknown Runner'}</Text>
-                      <Text style={styles.userMeta}>{formatDate(post.createdAt)}</Text>
+                      <Text style={styles.userName}>
+                        {post.userId?.name || 'Unknown Runner'}
+                      </Text>
+                      <Text style={styles.userMeta}>
+                        {formatDate(post.createdAt)}
+                      </Text>
                     </View>
                   </View>
                   <TouchableOpacity style={styles.followButton} disabled>
@@ -152,25 +159,37 @@ const CommunityFeedScreen = () => {
                   <View style={styles.chipsRow}>
                     <View style={styles.dataChip}>
                       <Text style={styles.dataChipLabel}>DIST</Text>
-                      <Text style={styles.dataChipValue}>{post.runId.distance?.toFixed(1)} KM</Text>
+                      <Text style={styles.dataChipValue}>
+                        {post.runId.distance?.toFixed(1)} KM
+                      </Text>
                     </View>
                     <View style={styles.dataChip}>
                       <Text style={styles.dataChipLabel}>PACE</Text>
                       <Text style={styles.dataChipValue}>
-                        {post.runId.avgSpeed ? (60 / post.runId.avgSpeed).toFixed(1) : '--'} /KM
+                        {post.runId.avgSpeed
+                          ? (60 / post.runId.avgSpeed).toFixed(1)
+                          : '--'}{' '}
+                        /KM
                       </Text>
                     </View>
                   </View>
                 ) : null}
 
                 <View style={styles.engagementRow}>
-                  <TouchableOpacity style={styles.engageBtn} onPress={() => handleLike(post._id)}>
+                  <TouchableOpacity
+                    style={styles.engageBtn}
+                    onPress={() => handleLike(post._id)}
+                  >
                     <Text style={styles.engageLabel}>LIKE</Text>
-                    <Text style={styles.engageCount}>{post.likesCount || 0}</Text>
+                    <Text style={styles.engageCount}>
+                      {post.likesCount || 0}
+                    </Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={styles.engageBtn}>
                     <Text style={styles.engageLabel}>COMMENTS</Text>
-                    <Text style={styles.engageCount}>{post.commentsCount || 0}</Text>
+                    <Text style={styles.engageCount}>
+                      {post.commentsCount || 0}
+                    </Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={styles.cheerButton} disabled>
                     <Text style={styles.cheerText}>CHEER</Text>
@@ -178,23 +197,8 @@ const CommunityFeedScreen = () => {
                 </View>
               </View>
             </View>
-          ))}
-
-        <View style={styles.sidebarCard}>
-          <Text style={styles.sidebarTitle}>TRENDING CHALLENGES</Text>
-          <View style={styles.challengeItem}>
-            <Text style={styles.challengeName}>Midnight Marathon Relay</Text>
-            <View style={styles.challengeTrack}>
-              <View style={[styles.challengeFill, {width: '65%'}]} />
-            </View>
-          </View>
-          <View style={styles.challengeItem}>
-            <Text style={styles.challengeName}>Vertical Climb Protocol</Text>
-            <View style={styles.challengeTrack}>
-              <View style={[styles.challengeFillOrange, {width: '32%'}]} />
-            </View>
-          </View>
-        </View>
+          ))
+        )}
 
         <View style={styles.footerSpace} />
       </ScrollView>
@@ -203,14 +207,14 @@ const CommunityFeedScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {flex: 1, backgroundColor: Colors.surface},
+  container: { flex: 1, backgroundColor: Colors.surface },
   loadingState: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: Colors.surface,
   },
-  content: {paddingHorizontal: 24, paddingTop: 24, paddingBottom: 24},
+  content: { paddingHorizontal: 24, paddingTop: 24, paddingBottom: 24 },
   kicker: {
     color: Colors.primary + '99',
     fontSize: 11,
@@ -307,7 +311,7 @@ const styles = StyleSheet.create({
     height: 4,
     borderRadius: 999,
     backgroundColor: Colors.primary,
-    transform: [{rotate: '-10deg'}],
+    transform: [{ rotate: '-10deg' }],
   },
   routeDot: {
     position: 'absolute',
@@ -453,44 +457,6 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     letterSpacing: 1.6,
     textTransform: 'uppercase',
-  },
-  sidebarCard: {
-    backgroundColor: Colors.surfaceContainerLow,
-    borderRadius: 24,
-    padding: 20,
-  },
-  sidebarTitle: {
-    color: Colors.onSurface,
-    fontFamily: 'Lexend-Bold',
-    fontSize: 20,
-    fontWeight: '800',
-    fontStyle: 'italic',
-    marginBottom: 16,
-  },
-  challengeItem: {
-    marginBottom: 18,
-  },
-  challengeName: {
-    color: Colors.onSurface,
-    fontSize: 13,
-    fontWeight: '700',
-    marginBottom: 10,
-  },
-  challengeTrack: {
-    height: 8,
-    borderRadius: 999,
-    backgroundColor: Colors.surfaceContainerHighest,
-    overflow: 'hidden',
-  },
-  challengeFill: {
-    height: '100%',
-    borderRadius: 999,
-    backgroundColor: Colors.primary,
-  },
-  challengeFillOrange: {
-    height: '100%',
-    borderRadius: 999,
-    backgroundColor: Colors.tertiary,
   },
   footerSpace: {
     height: 120,

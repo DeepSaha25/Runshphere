@@ -1,7 +1,6 @@
-import React, {useCallback, useMemo, useState} from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
-  Image,
   RefreshControl,
   ScrollView,
   StatusBar,
@@ -10,15 +9,19 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {useFocusEffect} from '@react-navigation/native';
+import { useFocusEffect } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
 import AppHeader from '../components/AppHeader';
-import {useLeaderboardStore} from '../store/leaderboardStore';
-import {useUserStore} from '../store/userStore';
-import {Colors} from '../theme/colors';
-import {formatClock, formatPace, formatRelativeRunDate} from '../utils/runMetrics';
+import { useLeaderboardStore } from '../store/leaderboardStore';
+import { useUserStore } from '../store/userStore';
+import { Colors } from '../theme/colors';
+import {
+  formatClock,
+  formatPace,
+  formatRelativeRunDate,
+} from '../utils/runMetrics';
 
-const HomeScreen = ({navigation}: any) => {
+const HomeScreen = ({ navigation }: any) => {
   const profile = useUserStore(state => state.profile);
   const stats = useUserStore(state => state.stats);
   const dailyStats = useUserStore(state => state.dailyStats);
@@ -59,16 +62,20 @@ const HomeScreen = ({navigation}: any) => {
   const cityWeekly = leaderboardEntries['city:weekly'] || [];
   const localRank = leaderboardRanks['local:today'];
   const weeklyDistance = Number(weeklyStats?.totalDistance || 0);
-  const totalDistance = Number(stats?.totalDistance || profile?.totalDistance || 0);
+  const totalDistance = Number(
+    stats?.totalDistance || profile?.totalDistance || 0,
+  );
 
-  const locationLabel = useMemo(() => {
-    const city = profile?.location?.city;
-    const state = profile?.location?.state;
-    if (city && state) {
-      return `${city}, ${state}`;
-    }
-    return city || state || 'Location not synced';
-  }, [profile?.location?.city, profile?.location?.state]);
+  const location = profile?.location;
+  const locationLabel =
+    location?.city && location?.state
+      ? `${location.city}, ${location.state}`
+      : location?.city || location?.state
+      ? location.city || location.state
+      : typeof location?.latitude === 'number' &&
+        typeof location?.longitude === 'number'
+      ? 'Location synced'
+      : 'Location not synced';
 
   const activeProgress = Math.max(8, Math.min(100, (weeklyDistance / 6) * 100));
 
@@ -96,7 +103,8 @@ const HomeScreen = ({navigation}: any) => {
             onRefresh={onRefresh}
             tintColor={Colors.primaryContainer}
           />
-        }>
+        }
+      >
         <Text style={styles.kicker}>TODAY'S DISTANCE</Text>
         <View style={styles.heroRow}>
           <Text style={styles.heroValue}>
@@ -108,12 +116,14 @@ const HomeScreen = ({navigation}: any) => {
         <TouchableOpacity
           activeOpacity={0.92}
           onPress={() => navigation.navigate('RunTracking')}
-          style={styles.startActionWrap}>
+          style={styles.startActionWrap}
+        >
           <LinearGradient
             colors={[Colors.primary, Colors.primaryContainer]}
-            start={{x: 0, y: 0}}
-            end={{x: 1, y: 1}}
-            style={styles.startAction}>
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.startAction}
+          >
             <Text style={styles.startActionText}>START RUN</Text>
             <Text style={styles.startActionArrow}>NOW</Text>
           </LinearGradient>
@@ -123,23 +133,30 @@ const HomeScreen = ({navigation}: any) => {
           <View style={styles.card}>
             <Text style={styles.cardLabel}>LAST PERFORMANCE</Text>
             <Text style={styles.cardTitle}>
-              {lastRun ? `${Number(lastRun.distance || 0).toFixed(2)} KM` : 'NO RUN YET'}
+              {lastRun
+                ? `${Number(lastRun.distance || 0).toFixed(2)} KM`
+                : 'NO RUN YET'}
             </Text>
             <Text style={styles.cardMeta}>
-              {lastRun ? formatRelativeRunDate(lastRun.date) : 'Start a tracked run to build the dashboard.'}
+              {lastRun
+                ? formatRelativeRunDate(lastRun.date)
+                : 'Start a tracked run to build the dashboard.'}
             </Text>
             {lastRun ? (
               <View style={styles.metricRow}>
                 <View>
                   <Text style={styles.metricValue}>
                     {formatPace(
-                      lastRun.averagePace || (lastRun.avgSpeed ? 60 / lastRun.avgSpeed : 0),
+                      lastRun.averagePace ||
+                        (lastRun.avgSpeed ? 60 / lastRun.avgSpeed : 0),
                     )}
                   </Text>
                   <Text style={styles.metricCaption}>PACE</Text>
                 </View>
                 <View>
-                  <Text style={styles.metricValue}>{formatClock(lastRun.duration || 0)}</Text>
+                  <Text style={styles.metricValue}>
+                    {formatClock(lastRun.duration || 0)}
+                  </Text>
                   <Text style={styles.metricCaption}>TIME</Text>
                 </View>
               </View>
@@ -149,10 +166,13 @@ const HomeScreen = ({navigation}: any) => {
           <View style={[styles.card, styles.cardLow]}>
             <Text style={styles.cardLabel}>ACTIVE TIME / WEEK</Text>
             <Text style={styles.highlightValue}>
-              {weeklyDistance.toFixed(1)} <Text style={styles.highlightUnit}>KM</Text>
+              {weeklyDistance.toFixed(1)}{' '}
+              <Text style={styles.highlightUnit}>KM</Text>
             </Text>
             <View style={styles.progressTrack}>
-              <View style={[styles.progressFill, {width: `${activeProgress}%`}]} />
+              <View
+                style={[styles.progressFill, { width: `${activeProgress}%` }]}
+              />
             </View>
             <Text style={styles.cardMeta}>
               {(weeklyStats?.totalRuns || 0).toString()} runs synced this week
@@ -161,7 +181,9 @@ const HomeScreen = ({navigation}: any) => {
 
           <View style={styles.card}>
             <Text style={styles.cardLabel}>LOCAL SQUAD RANK</Text>
-            <Text style={styles.rankValue}>{localRank ? `#${localRank}` : '--'}</Text>
+            <Text style={styles.rankValue}>
+              {localRank ? `#${localRank}` : '--'}
+            </Text>
             <Text style={styles.cardMeta}>{locationLabel}</Text>
             <Text style={styles.cardHint}>
               Lifetime distance {totalDistance.toFixed(1)} km
@@ -169,29 +191,15 @@ const HomeScreen = ({navigation}: any) => {
           </View>
         </View>
 
-        <View style={styles.mapPanel}>
-          <Image
-            source={{uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBO0nxRiiaFGe7NcBsFC1eRj1kr69dZxt7uTuvWhWVY3W-v36lPyNB3IG2rVIIsoBNtEUVj8wDZBmxplxlQFJZuQQ6rZnMT5Z67WIBArgTBQ0lt3ZMtLFsbJjslBPs_FzKJ_COLG_sowbyiKswrqcWbiMOwYB1ru7JcalIj1UPcnA5X6FRKo5egC-oYWBjLG65VIu-ot_YWThX7o7ruwGgN_IDVDDoi6KJQHIORBId_z1_TD8hqAJLnf-tnsUq5bfpmqooQFhh2sKWb'}}
-            style={styles.mapImage}
-          />
-          <View style={styles.mapOverlay} />
-          <View style={styles.routeLine} />
-          <View style={styles.routeDot} />
-          <Text style={styles.mapBadge}>LIVE TRACKING ACTIVE</Text>
-          <Text style={styles.mapTitle}>{locationLabel}</Text>
-          <Text style={styles.mapText}>
-            {localToday.length > 0
-              ? `${localToday.length} nearby runners loaded. Push harder to move up the board.`
-              : 'Sync your location to unlock nearby runners and local momentum.'}
-          </Text>
-        </View>
-
         <View style={styles.previewGrid}>
           <View style={styles.previewCard}>
             <Text style={styles.previewTitle}>LOCAL TODAY</Text>
             {localToday.length > 0 ? (
               localToday.map((entry, index) => (
-                <View key={`${entry.userId}-${index}`} style={styles.previewRow}>
+                <View
+                  key={`${entry.userId}-${index}`}
+                  style={styles.previewRow}
+                >
                   <Text style={styles.previewRank}>{entry.rank}</Text>
                   <Text numberOfLines={1} style={styles.previewName}>
                     {entry.name}
@@ -202,7 +210,9 @@ const HomeScreen = ({navigation}: any) => {
                 </View>
               ))
             ) : (
-              <Text style={styles.emptyText}>Local standings appear after your first synced GPS run.</Text>
+              <Text style={styles.emptyText}>
+                Local standings appear after your first synced GPS run.
+              </Text>
             )}
           </View>
 
@@ -210,7 +220,10 @@ const HomeScreen = ({navigation}: any) => {
             <Text style={styles.previewTitle}>CITY WEEK</Text>
             {cityWeekly.length > 0 ? (
               cityWeekly.map((entry, index) => (
-                <View key={`${entry.userId}-${index}`} style={styles.previewRow}>
+                <View
+                  key={`${entry.userId}-${index}`}
+                  style={styles.previewRow}
+                >
                   <Text style={styles.previewRank}>{entry.rank}</Text>
                   <Text numberOfLines={1} style={styles.previewName}>
                     {entry.name}
@@ -221,7 +234,9 @@ const HomeScreen = ({navigation}: any) => {
                 </View>
               ))
             ) : (
-              <Text style={styles.emptyText}>City momentum will populate when leaderboard data is available.</Text>
+              <Text style={styles.emptyText}>
+                City momentum will populate when leaderboard data is available.
+              </Text>
             )}
           </View>
         </View>
@@ -306,7 +321,7 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     borderRadius: 24,
     shadowColor: Colors.primary,
-    shadowOffset: {width: 0, height: 12},
+    shadowOffset: { width: 0, height: 12 },
     shadowOpacity: 0.22,
     shadowRadius: 24,
     elevation: 8,
@@ -413,69 +428,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginTop: 10,
   },
-  mapPanel: {
-    backgroundColor: Colors.surfaceContainerLow,
-    borderRadius: 32,
-    padding: 22,
-    overflow: 'hidden',
-    minHeight: 300,
-    marginBottom: 22,
-  },
-  mapImage: {
-    ...StyleSheet.absoluteFill,
-    width: '100%',
-    height: '100%',
-    opacity: 0.5,
-  },
-  mapOverlay: {
-    ...StyleSheet.absoluteFill,
-    backgroundColor: Colors.surfaceContainerLow + '44',
-  },
-  routeLine: {
-    position: 'absolute',
-    left: 34,
-    right: 46,
-    top: 92,
-    height: 4,
-    borderRadius: 999,
-    backgroundColor: Colors.primary,
-    transform: [{rotate: '-12deg'}],
-    shadowColor: Colors.primary,
-    shadowOpacity: 0.7,
-    shadowRadius: 10,
-    shadowOffset: {width: 0, height: 0},
-  },
-  routeDot: {
-    position: 'absolute',
-    right: 42,
-    top: 74,
-    width: 14,
-    height: 14,
-    borderRadius: 999,
-    backgroundColor: Colors.secondary,
-  },
-  mapBadge: {
-    color: Colors.onSurface,
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 2.2,
-    textTransform: 'uppercase',
-  },
-  mapTitle: {
-    color: Colors.onSurface,
-    fontFamily: 'Lexend-Bold',
-    fontSize: 26,
-    fontWeight: '800',
-    fontStyle: 'italic',
-    marginTop: 68,
-  },
-  mapText: {
-    color: Colors.onSurfaceVariant,
-    fontSize: 13,
-    lineHeight: 20,
-    marginTop: 8,
-    maxWidth: '78%',
-  },
   previewGrid: {
     gap: 16,
   },
@@ -519,7 +471,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   footerSpace: {
-    height: 120,
+    height: 150,
   },
 });
 

@@ -1,96 +1,94 @@
 import React from 'react';
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import {Colors} from '../theme/colors';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Colors } from '../theme/colors';
 
 interface AppHeaderProps {
   showStreak?: boolean;
   streakCount?: number;
   rightElement?: React.ReactNode;
-  onMenuPress?: () => void;
 }
 
 const AppHeader: React.FC<AppHeaderProps> = ({
   showStreak = false,
   streakCount = 0,
   rightElement,
-  onMenuPress,
-}) => (
-  <View style={styles.header}>
-    <View style={styles.leftCluster}>
-      <TouchableOpacity
-        activeOpacity={0.72}
-        onPress={onMenuPress}
-        style={styles.menuButton}>
-        <Text style={styles.menuText}>menu</Text>
-      </TouchableOpacity>
-      <Text style={styles.logoText}>RUNSPHERE</Text>
-    </View>
+}) => {
+  const insets = useSafeAreaInsets();
+  const navigation = useNavigation<any>();
 
-    {rightElement || (
-      <View style={styles.rightCluster}>
-        {showStreak ? (
-          <View style={styles.streakBadge}>
-            <View style={styles.streakDot} />
-            <Text style={styles.streakText}>{streakCount}</Text>
-          </View>
-        ) : null}
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>RS</Text>
-        </View>
+  const openProfile = () => {
+    navigation.navigate('Profile');
+  };
+
+  return (
+    <View style={[styles.header, { paddingTop: Math.max(insets.top + 8, 16) }]}>
+      <View style={styles.leftCluster}>
+        <Text numberOfLines={1} adjustsFontSizeToFit style={styles.logoText}>
+          RunSphere
+        </Text>
       </View>
-    )}
-  </View>
-);
+
+      {rightElement || (
+        <View style={styles.rightCluster}>
+          {showStreak ? (
+            <View style={styles.streakBadge}>
+              <View style={styles.streakDot} />
+              <Text style={styles.streakText}>{streakCount}</Text>
+            </View>
+          ) : null}
+          <TouchableOpacity
+            activeOpacity={0.76}
+            onPress={openProfile}
+            style={styles.avatar}
+          >
+            <Text style={styles.avatarText}>RS</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   header: {
-    minHeight: 72,
-    paddingTop: 18,
-    paddingBottom: 14,
-    paddingHorizontal: 24,
+    paddingBottom: 10,
+    paddingHorizontal: 16,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: Colors.surface + '99',
+    backgroundColor: Colors.surfaceContainerLow + 'F2',
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.outlineVariant,
     shadowColor: Colors.primary,
-    shadowOffset: {width: 0, height: 8},
+    shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.08,
     shadowRadius: 24,
     elevation: 12,
   },
   leftCluster: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 14,
-  },
-  menuButton: {
-    minWidth: 32,
-    minHeight: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  menuText: {
-    color: Colors.primary,
-    fontSize: 12,
-    fontWeight: '900',
-    letterSpacing: 0,
-    textTransform: 'uppercase',
+    gap: 10,
+    marginRight: 12,
   },
   logoText: {
     fontFamily: 'Lexend-Bold',
-    fontSize: 24,
+    fontSize: 21,
     fontWeight: '900',
     fontStyle: 'italic',
     color: Colors.primary,
-    letterSpacing: -0.5,
-    textTransform: 'uppercase',
+    letterSpacing: 0,
+    flexShrink: 1,
     textShadowColor: 'rgba(153,247,255,0.8)',
-    textShadowOffset: {width: 0, height: 0},
+    textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 8,
   },
   avatar: {
-    width: 40,
-    height: 40,
+    width: 38,
+    height: 38,
     borderRadius: 999,
     alignItems: 'center',
     justifyContent: 'center',
@@ -107,7 +105,7 @@ const styles = StyleSheet.create({
   rightCluster: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 8,
   },
   streakBadge: {
     flexDirection: 'row',

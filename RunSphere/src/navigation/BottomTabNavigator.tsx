@@ -1,99 +1,133 @@
 import React from 'react';
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import HomeScreen from '../screens/HomeScreen';
 import LeaderboardScreen from '../screens/LeaderboardScreen';
 import HistoryScreen from '../screens/HistoryScreen';
 import CommunityFeedScreen from '../screens/CommunityFeedScreen';
 import ProfileScreen from '../screens/ProfileScreen';
-import {Colors} from '../theme/colors';
-import {MainTabParamList} from './types';
+import { Colors } from '../theme/colors';
+import { MainTabParamList } from './types';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
-const TAB_CONFIG: Record<keyof MainTabParamList, {label: string}> = {
-  Home: {label: 'Home'},
-  Leaderboards: {label: 'Ranks'},
-  History: {label: 'Runs'},
-  Community: {label: 'Social'},
-  Profile: {label: 'Me'},
+const TAB_CONFIG: Record<keyof MainTabParamList, { label: string }> = {
+  Home: { label: 'Home' },
+  Leaderboards: { label: 'Ranks' },
+  History: { label: 'Runs' },
+  Community: { label: 'Social' },
+  Profile: { label: 'Me' },
 };
 
-const BottomTabNavigator = ({navigation}: any) => (
-  <Tab.Navigator
-    screenOptions={{
-      headerShown: false,
-      tabBarStyle: styles.hiddenTabBar,
-    }}
-    tabBar={({state, navigation: tabNavigation}) => (
-      <View style={styles.tabBar}>
-        <TouchableOpacity
-          style={[styles.tabItem, state.index === 0 && styles.activeTabItem]}
-          onPress={() => tabNavigation.navigate('Home')}>
-          <Text style={[styles.tabLabel, state.index === 0 && styles.activeText]}>Home</Text>
-        </TouchableOpacity>
+const VISIBLE_TABS: Array<keyof MainTabParamList> = [
+  'Home',
+  'Leaderboards',
+  'History',
+  'Community',
+];
 
-        <TouchableOpacity
-          style={styles.runTabItem}
-          onPress={() => navigation.navigate('RunTracking')}>
-          <Text style={styles.runTabLabel}>Run</Text>
-        </TouchableOpacity>
+const BottomTabNavigator = ({ navigation }: any) => {
+  const insets = useSafeAreaInsets();
+  const bottomInset = Math.max(insets.bottom, 10);
 
-        {state.routes.slice(1).map((route, offset) => {
-          const routeIndex = offset + 1;
-          const config = TAB_CONFIG[route.name as keyof MainTabParamList];
-          const isFocused = state.index === routeIndex;
+  return (
+    <Tab.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: styles.hiddenTabBar,
+      }}
+      tabBar={({ state, navigation: tabNavigation }) => (
+        <View style={[styles.tabShell, { bottom: bottomInset + 8 }]}>
+          <View style={styles.tabBar}>
+            {state.routes
+              .filter(route =>
+                VISIBLE_TABS.includes(route.name as keyof MainTabParamList),
+              )
+              .map((route, visibleIndex) => {
+                const routeIndex = state.routes.findIndex(
+                  item => item.key === route.key,
+                );
+                const config = TAB_CONFIG[route.name as keyof MainTabParamList];
+                const isFocused = state.index === routeIndex;
 
-          return (
-            <TouchableOpacity
-              key={route.key}
-              style={[styles.tabItem, isFocused && styles.activeTabItem]}
-              onPress={() => tabNavigation.navigate(route.name as never)}>
-              <Text style={[styles.tabLabel, isFocused && styles.activeText]}>
-                {config.label}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
-    )}>
-    <Tab.Screen name="Home" component={HomeScreen} />
-    <Tab.Screen name="Leaderboards" component={LeaderboardScreen} />
-    <Tab.Screen name="History" component={HistoryScreen} />
-    <Tab.Screen name="Community" component={CommunityFeedScreen} />
-    <Tab.Screen name="Profile" component={ProfileScreen} />
-  </Tab.Navigator>
-);
+                return (
+                  <React.Fragment key={route.key}>
+                    {visibleIndex === 2 ? (
+                      <TouchableOpacity
+                        style={styles.runTabItem}
+                        onPress={() => navigation.navigate('RunTracking')}
+                        activeOpacity={0.86}
+                      >
+                        <Text style={styles.runTabLabel}>Run</Text>
+                      </TouchableOpacity>
+                    ) : null}
+                    <TouchableOpacity
+                      style={[
+                        styles.tabItem,
+                        isFocused && styles.activeTabItem,
+                      ]}
+                      onPress={() =>
+                        tabNavigation.navigate(route.name as never)
+                      }
+                      activeOpacity={0.78}
+                    >
+                      <Text
+                        style={[
+                          styles.tabLabel,
+                          isFocused && styles.activeText,
+                        ]}
+                      >
+                        {config.label}
+                      </Text>
+                    </TouchableOpacity>
+                  </React.Fragment>
+                );
+              })}
+          </View>
+        </View>
+      )}
+    >
+      <Tab.Screen name="Home" component={HomeScreen} />
+      <Tab.Screen name="Leaderboards" component={LeaderboardScreen} />
+      <Tab.Screen name="History" component={HistoryScreen} />
+      <Tab.Screen name="Community" component={CommunityFeedScreen} />
+      <Tab.Screen name="Profile" component={ProfileScreen} />
+    </Tab.Navigator>
+  );
+};
 
 const styles = StyleSheet.create({
   hiddenTabBar: {
     display: 'none',
   },
-  tabBar: {
+  tabShell: {
     position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    minHeight: 84,
-    paddingHorizontal: 12,
-    paddingTop: 10,
-    paddingBottom: 18,
-    borderTopLeftRadius: 32,
-    borderTopRightRadius: 32,
+    left: 12,
+    right: 12,
+    alignItems: 'center',
+  },
+  tabBar: {
+    width: '100%',
+    minHeight: 58,
+    paddingHorizontal: 7,
+    paddingVertical: 7,
+    borderRadius: 22,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-around',
-    backgroundColor: Colors.surface + '99',
+    backgroundColor: Colors.surfaceContainer + 'F2',
+    borderWidth: 1,
+    borderColor: Colors.outlineVariant,
     shadowColor: Colors.primary,
-    shadowOffset: {width: 0, height: -8},
-    shadowOpacity: 0.16,
-    shadowRadius: 32,
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.14,
+    shadowRadius: 24,
     elevation: 18,
   },
   tabItem: {
     flex: 1,
-    height: 44,
-    borderRadius: 22,
+    height: 42,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -102,32 +136,36 @@ const styles = StyleSheet.create({
     fontFamily: 'Lexend-Bold',
     fontSize: 11,
     fontWeight: '800',
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
+    letterSpacing: 0,
   },
   activeTabItem: {
-    backgroundColor: Colors.primary + '14',
+    backgroundColor: Colors.primary + '18',
   },
   runTabItem: {
-    flex: 1,
-    height: 52,
-    borderRadius: 26,
+    width: 70,
+    height: 42,
+    borderRadius: 21,
+    marginHorizontal: 3,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: Colors.primary,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.2,
+    shadowRadius: 14,
+    elevation: 12,
   },
   runTabLabel: {
     color: Colors.onPrimaryFixed,
     fontFamily: 'Lexend-Bold',
     fontSize: 12,
     fontWeight: '900',
-    letterSpacing: 1,
-    textTransform: 'uppercase',
+    letterSpacing: 0,
   },
   activeText: {
     color: Colors.primary,
     textShadowColor: 'rgba(153,247,255,0.8)',
-    textShadowOffset: {width: 0, height: 0},
+    textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 8,
   },
 });
